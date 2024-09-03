@@ -1,0 +1,30 @@
+<div class="center">
+    <h1> Express App : {{title}}</h1>
+    <br>
+    <div class="inputbox">
+        <select name="users" id="user">
+            {{#compare data null operator="=="}}
+                <option value="rien">Il n'y a pas de données dans la base users</option>
+            {{else}}
+                <option value="0">Sélectionnez un utilisateur</option>
+                {{#each data}}
+                    <option value="{{this.id_users}}">{{this.name}} {{this.firstName}}-{{this.function}}</option>
+                {{/each}}
+            {{/compare}}
+        </select>
+    </div>
+    <h2>or</h2><br />
+    <div class="inputbox">
+        <button id="newUser">Creéer un utilisateur</button>
+    </div>
+</div>
+<script>
+    var usr = document.getElementById('user');
+    usr.addEventListener('change', function (evt) {
+        window.location = "/formUser/" + usr.value;
+    });
+    var btn_new = document.getElementById('newUser');
+    btn_new.addEventListener('click', function (evt) {
+        window.location = "/newUser";
+    });
+</script>
