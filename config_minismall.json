@@ -1,22 +1,21 @@
 {
     "server": {
-        "port": 3040
+        "port": 3000
     },
     "sequelize": {
-        "used": "True",
-        "dialect": "mariadb",
+        "used": "false",
+        "dialect": "mysql",
         "host": "localhost",
         "port": "3306",
         "databaseName": "R504TP",
-        "userName": "admin",
-        "password": "azerty"
+        "userName": "baba",
+        "password": "2%gXiv#4cd&tNQ"
     },
     "mongodb": {
-        "used": "False",
+        "used": "false",
         "url": "mongodb://127.0.0.1:27017/r504"
     },
     "mongoose": {
-        "used": "False",
-        "url": "mongodb://127.0.0.1:27017/r504"
+        "used": true
     }
 }

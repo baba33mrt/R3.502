@@ -8,6 +8,7 @@ var session = require('express-session');
 var passport = require("passport");
 var LocalStrategy = require('passport-local').Strategy;
 var multer = require('multer');
+require('dotenv').config();
 
 global.upload = multer({
     dest: './public/data/uploads/'
@@ -61,11 +62,11 @@ if (global.config.mongodb.used == "True") {
         console.log("Connected successfully to server: global.db initialized");
     });
 }
-if (global.config.mongoose.used == "True") {
+if (global.config.mongoose.used === true) {
     // connexion depuis mongoose
     global.schemas = {};
     var mongoose = require('mongoose');
-    mongoose.connect(config.mongoose.url, {
+    mongoose.connect(process.env.MONGO_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true
     }, function(err) {
@@ -106,13 +107,14 @@ if (global.config.sequelize.used == "True") {
             idle: 10000
         }
     });
+    try {
+        sequelize.authenticate();
+        console.log('Sequelize : Connection has been established successfully.');
+    } catch (error) {
+        console.error('Sequelize: Unable to connect to the database:', error);
+    }
 }
-try {
-    sequelize.authenticate();
-    console.log('Sequelize : Connection has been established successfully.');
-} catch (error) {
-    console.error('Sequelize: Unable to connect to the database:', error);
-}
+
 
 var app = express();
 
@@ -159,7 +161,7 @@ passport.deserializeUser(function(id, done) {
 
 passport.use(new LocalStrategy(
     // Version du code pour mongoDB via mongoose
-    /*function(username, password, done) {
+    function(username, password, done) {
         global.schemas["Users"].findOne({
             login: username
         }, function(err, user) {
@@ -181,37 +183,37 @@ passport.use(new LocalStrategy(
             console.log("utilisateur : ", user);
             return done(null, user);
         });
-    }*/
+    }
     //************************************************************************************** */
     // Version du code pour base SQL via Sequelize
-    function(username, password, done) {
-        var params_value = [];
-        params_value.push(username);
-        params_value.push(password);
-        // ici on réalise une requête
-        global.sequelize.query("SELECT id_users, login, mdp FROM users WHERE login=?", {
-                replacements: params_value,
-                type: sequelize.QueryTypes.SELECT
-            })
-            .then(function(result) { // sql query success
-                if (!result[0]) {
-                    console.log("pas d'utilisateur trouvé");
-                    return done(null, false, {
-                        message: 'Incorrect username.'
-                    });
-                }
-                if (result[0].mdp != password) {
-                    console.log("password erroné");
-                    return done(null, false, {
-                        message: 'Incorrect password.'
-                    });
-                }
-                console.log("utilisateur : ", result[0]);
-                return done(null, result[0]);
-            }).catch(function(err) { // sql query error
-                console.log('error select', err);
-            });
-    }
+    // function(username, password, done) {
+    //     var params_value = [];
+    //     params_value.push(username);
+    //     params_value.push(password);
+    //     // ici on réalise une requête
+    //     global.sequelize.query("SELECT id_users, login, mdp FROM users WHERE login=?", {
+    //             replacements: params_value,
+    //             type: sequelize.QueryTypes.SELECT
+    //         })
+    //         .then(function(result) { // sql query success
+    //             if (!result[0]) {
+    //                 console.log("pas d'utilisateur trouvé");
+    //                 return done(null, false, {
+    //                     message: 'Incorrect username.'
+    //                 });
+    //             }
+    //             if (result[0].mdp != password) {
+    //                 console.log("password erroné");
+    //                 return done(null, false, {
+    //                     message: 'Incorrect password.'
+    //                 });
+    //             }
+    //             console.log("utilisateur : ", result[0]);
+    //             return done(null, result[0]);
+    //         }).catch(function(err) { // sql query error
+    //             console.log('error select', err);
+    //         });
+    // }
 ));
 
 app.post('/authenticated', passport.authenticate('local'), function(req, res) {
