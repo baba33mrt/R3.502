@@ -23,5 +23,11 @@ const Users = new mongoose.Schema({
     lastLogin: { type: Date }
 })
 
+Users.pre('save', function(next) {
+    this.updatedAt = Date.now();
+    next();
+});
+
+
 module.exports = mongoose.model('Users', Users, 'users')
 
