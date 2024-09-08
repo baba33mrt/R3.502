@@ -7,4 +7,4 @@ En collaboration avec :
 
 - Khadim DIENG
 - Mohamad EL AKHAL EL BOUZIDI
-- Bptiste MARTIN
+- Baptiste MARTIN
