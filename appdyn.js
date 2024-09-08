@@ -1,13 +1,16 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var fs = require("fs");
-var session = require('express-session');
-var passport = require("passport");
-var LocalStrategy = require('passport-local').Strategy;
-var multer = require('multer');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const fs = require("fs");
+const session = require('express-session');
+const passport = require("passport");
+const LocalStrategy = require('passport-local').Strategy;
+const multer = require('multer');
+
+const {checkPassword} = require('./utils/CryptoManager');
+
 require('dotenv').config();
 
 global.upload = multer({
@@ -21,7 +24,9 @@ global.config = JSON.parse(fs.readFileSync("./config_minismall.json", "utf8"));
 global.actions_json = JSON.parse(fs.readFileSync("./routes/config_actions.json", "utf8"));
 
 
-var hbs = require('hbs');
+const hbs = require('hbs');
+const datanaseManager = require("./utils/databaseManager");
+const mongoose = require("mongoose");
 hbs.registerPartials(__dirname + '/views/partials', function() {
     console.log('partials registered');
 });
@@ -30,30 +35,30 @@ hbs.registerHelper('compare', function(lvalue, rvalue, options) {
     //console.log("####### COMPARE lvalue :", lvalue, " et rvalue: ", rvalue);
     if (arguments.length < 3)
         throw new Error("Handlerbars Helper 'compare' needs 2 parameters");
-    var operator = options.hash.operator || "==";
-    var operators = {
-        '==': function(l, r) {
+    const operator = options.hash.operator || "==";
+    const operators = {
+        '==': function (l, r) {
             return l == r;
         },
-        '===': function(l, r) {
+        '===': function (l, r) {
             return l === r;
         }
-    }
+    };
     if (!operators[operator])
         throw new Error("'compare' doesn't know the operator " + operator);
-    var result = operators[operator](lvalue, rvalue);
+    const result = operators[operator](lvalue, rvalue);
     if (result) {
         return options.fn(this);
     } else {
         return options.inverse(this);
     }
 });
-if (global.config.mongodb.used == "True") {
+if (global.config.mongodb.used) {
     global.db = {};
-    var mongoClient = require('mongodb').MongoClient;
+    const mongoClient = require('mongodb').MongoClient;
     // Connexion URL
     //var url = 'mongodb://greta:azerty@127.0.0.1:27017/gretajs?authMechanism=DEFAULT';
-    var url = config.mongodb.url;
+    const url = config.mongodb.url;
     // Utilisation de la methode “connect” pour se connecter au serveur
     mongoClient.connect(url, {
         useUnifiedTopology: true
@@ -62,10 +67,10 @@ if (global.config.mongodb.used == "True") {
         console.log("Connected successfully to server: global.db initialized");
     });
 }
-if (global.config.mongoose.used === true) {
+if (global.config.mongoose.used) {
     // connexion depuis mongoose
     global.schemas = {};
-    var mongoose = require('mongoose');
+    const mongoose = require('mongoose');
     mongoose.connect(process.env.MONGO_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true
@@ -75,27 +80,33 @@ if (global.config.mongoose.used === true) {
         } else console.log('Connected Mongoose');
     });
 
-    // chargement des schémas depuis le fichier de configuration JSON dans une variable
-    var database_schemas = JSON.parse(fs.readFileSync("database_schema.json", 'utf8'));
-    // Initialisation de chaque schéma par association entre le schéma et la collection
-    for (modelName in database_schemas) {
-        global.schemas[modelName] = mongoose.model(modelName, database_schemas[modelName].schema,
-            database_schemas[modelName].collection);
-    }
-}
-//connexion via mariadb avec driver natif avec la variable pool en global
-/*var mariadb = require('mariadb');
-global.pool = mariadb.createPool({
-    host: 'localhost',
-    user: 'admin',
-    password: 'azerty',
-    database: 'gretajs',
-    connectionLimit: 5
-});*/
 
-if (global.config.sequelize.used == "True") {
+
+    if (global.config.mongoose.schemaSystem === "JSON"){
+        // chargement des schémas depuis le fichier de configuration JSON dans une variable
+        const database_schemas = JSON.parse(fs.readFileSync("database_schema.json", 'utf8'));
+        // Initialisation de chaque schéma par association entre le schéma et la collection
+        for (modelName in database_schemas) {
+            global.schemas[modelName] = new mongoose.model(modelName, database_schemas[modelName].schema,
+                database_schemas[modelName].collection);
+        }
+    }
+
+
+    if (global.config.mongoose.schemaSystem === "manager"){
+        const datanaseManager = require("./utils/databaseManager")
+        console.log(datanaseManager)
+        for (let modelName in datanaseManager){
+            global.schemas[modelName] = datanaseManager[modelName]
+        }
+    }
+
+}
+
+
+if (global.config.sequelize.used) {
     // connexion à mariadb via Sequelize
-    var Sequelize = require("sequelize");
+    const Sequelize = require("sequelize");
 
     // configuration des paramètres de la connexion
     global.sequelize = new Sequelize(config.sequelize.databaseName, config.sequelize.userName, config.sequelize.password, {
@@ -116,7 +127,7 @@ if (global.config.sequelize.used == "True") {
 }
 
 
-var app = express();
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -131,7 +142,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
     name: 'sessiongreta',
-    secret: 'AsipfGjdp*%dsDKNFNFKqoeID1345',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -141,29 +152,21 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 passport.serializeUser(function(user, done) {
-    done(null, user.id_users);
+    done(null, user.uuid);
 });
 
 passport.deserializeUser(function(id, done) {
-    var params_value = [];
-    params_value.push(id);
-    global.sequelize.query("SELECT * FROM users WHERE id_users=?", {
-        replacements: params_value,
-        type: sequelize.QueryTypes.SELECT
-    }).then(function(result) { // sql query success
-        console.log('deserialize user data : ', result);
-        done(null, result);
-    }).catch(function(err) { // sql query error
-        console.log('error select', err);
+    global.schemas["Users"].findOne({uuid: id}, function(err, user) {
+        done(err, user);
     });
-
 });
+
 
 passport.use(new LocalStrategy(
     // Version du code pour mongoDB via mongoose
     function(username, password, done) {
         global.schemas["Users"].findOne({
-            login: username
+            email: username
         }, function(err, user) {
             if (err) {
                 return done(err);
@@ -174,13 +177,13 @@ passport.use(new LocalStrategy(
                     message: 'Incorrect username.'
                 });
             }
-            if (user.mdp != password) {
+            if (!checkPassword(password, user.password)) {
                 console.log("password erroné");
                 return done(null, false, {
                     message: 'Incorrect password.'
                 });
             }
-            console.log("utilisateur : ", user);
+            console.log(user.firstName);
             return done(null, user);
         });
     }
@@ -218,7 +221,7 @@ passport.use(new LocalStrategy(
 
 app.post('/authenticated', passport.authenticate('local'), function(req, res) {
     if (req.session.passport.user != null) {
-        res.redirect('/index'); //le user est authentifié on affiche l’index il est en session
+        res.redirect('/dashboard'); //le user est authentifié on affiche l’index il est en session
     } else {
         res.redirect('/'); // il n’est pas présent on renvoie à la boîte de login
     }
@@ -228,7 +231,7 @@ require('./dynamicRouter')(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    next(createError(404));
+    res.render('404', createError(404));
 });
 
 // error handler
