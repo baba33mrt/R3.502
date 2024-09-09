@@ -12,11 +12,8 @@ const database = {
 module.exports = database;
 
 function loadSchema(filename) {
-    console.debug(`Loading schema: ${filename}`);
     try {
-        const returnData = require(`${schemafiles}${filename}.js`);
-        console.log(returnData)
-        return returnData
+        return require(`${schemafiles}${filename}.js`)
     } catch (e) {
         console.error(`Error loading schema: ${filename}`);
         console.error(e);

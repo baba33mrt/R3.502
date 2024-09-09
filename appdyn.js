@@ -25,8 +25,7 @@ global.actions_json = JSON.parse(fs.readFileSync("./routes/config_actions.json",
 
 
 const hbs = require('hbs');
-const datanaseManager = require("./utils/databaseManager");
-const mongoose = require("mongoose");
+
 hbs.registerPartials(__dirname + '/views/partials', function() {
     console.log('partials registered');
 });
@@ -57,8 +56,8 @@ if (global.config.mongodb.used) {
     global.db = {};
     const mongoClient = require('mongodb').MongoClient;
     // Connexion URL
-    //var url = 'mongodb://greta:azerty@127.0.0.1:27017/gretajs?authMechanism=DEFAULT';
     const url = config.mongodb.url;
+
     // Utilisation de la methode “connect” pour se connecter au serveur
     mongoClient.connect(url, {
         useUnifiedTopology: true
@@ -95,7 +94,6 @@ if (global.config.mongoose.used) {
 
     if (global.config.mongoose.schemaSystem === "manager"){
         const datanaseManager = require("./utils/databaseManager")
-        console.log(datanaseManager)
         for (let modelName in datanaseManager){
             global.schemas[modelName] = datanaseManager[modelName]
         }
@@ -183,40 +181,10 @@ passport.use(new LocalStrategy(
                     message: 'Incorrect password.'
                 });
             }
-            console.log(user.firstName);
+            // console.log(user.firstName);
             return done(null, user);
         });
     }
-    //************************************************************************************** */
-    // Version du code pour base SQL via Sequelize
-    // function(username, password, done) {
-    //     var params_value = [];
-    //     params_value.push(username);
-    //     params_value.push(password);
-    //     // ici on réalise une requête
-    //     global.sequelize.query("SELECT id_users, login, mdp FROM users WHERE login=?", {
-    //             replacements: params_value,
-    //             type: sequelize.QueryTypes.SELECT
-    //         })
-    //         .then(function(result) { // sql query success
-    //             if (!result[0]) {
-    //                 console.log("pas d'utilisateur trouvé");
-    //                 return done(null, false, {
-    //                     message: 'Incorrect username.'
-    //                 });
-    //             }
-    //             if (result[0].mdp != password) {
-    //                 console.log("password erroné");
-    //                 return done(null, false, {
-    //                     message: 'Incorrect password.'
-    //                 });
-    //             }
-    //             console.log("utilisateur : ", result[0]);
-    //             return done(null, result[0]);
-    //         }).catch(function(err) { // sql query error
-    //             console.log('error select', err);
-    //         });
-    // }
 ));
 
 app.post('/authenticated', passport.authenticate('local'), function(req, res) {
