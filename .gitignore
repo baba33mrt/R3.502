@@ -105,3 +105,4 @@ dist
 /dump/gretajs/
 /pnpm-lock.yaml
 /package-lock.json
+/tests/

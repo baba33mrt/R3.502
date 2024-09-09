@@ -17,11 +17,13 @@ function dynamicRouter(app) {
 vers le bon contrôleur en fonction de l'action du pathname  */
 function manageAction(req, res, next) {
     req.message = {};
+    console.log(req.originalUrl)
     let path = req.originalUrl; // Le pathname après le port 3040 dans l'URL.
     if (path.includes("?")) {
         path = path.split('?')[0];
         if (path.split('/').length > 0) path = '/' + path.split('/')[1]
-    } else if (path.split('/').length > 0) path = '/' + path.split('/')[1]
+    } else if (path.split('/').length > 0)
+    console.log(path)
     const type = req.method;
     // On défini la clé de l'annuaire config_actions.json dans une variable "action"
     req.message.action = type + path;
@@ -34,9 +36,10 @@ function manageAction(req, res, next) {
     /***************************************************************************************************** */
     /* Boucle de récupération des paramètres de l'action du fichier config_actions.json */
     for (let param in global.actions_json[req.message.action]) {
+        console.log(param)
         req.message[param] = (global.actions_json[req.message.action])[param];
     }
-    console.log('req.message dans dynamicRouteur : ', req.message);
+    // console.log('req.message dans dynamicRouteur : ', req.message);
 
     // Récupération des noms de champs pour un upload de fichiers passé dans le config_actions.json
     if (req.message.fieldUpload) global.fieldUpload = req.message.fieldUpload;
@@ -48,7 +51,7 @@ function manageAction(req, res, next) {
     // Si l'action n'est pas définie dans l'annuaire, on log l'erreur
     let instanceModule;
     if (typeof global.actions_json[req.message.action] == 'undefined') {
-        console.log("Erreur: Pas d'action dans l'annuaire config_actions.json : " + path);
+        // console.log("Erreur: Pas d'action dans l'annuaire config_actions.json : " + path);
         next();
     } else {
         instanceModule = require('./routes/' + req.message.controler);
