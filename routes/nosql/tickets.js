@@ -25,7 +25,7 @@ router.post('/create', [
     const { client, origine, projet, etat, level, domaine, type, sujet, message, author } = req.body;
 
     try {
-        const ticket = new Ticket({
+        const ticket = new schemas["Tickets"]({
             client,
             origine: {
                 type: origine.type,
