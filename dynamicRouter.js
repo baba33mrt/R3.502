@@ -54,7 +54,7 @@ function manageAction(req, res, next) {
         // console.log("Erreur: Pas d'action dans l'annuaire config_actions.json : " + path);
         next();
     } else {
-        instanceModule = require('./routes/' + req.message.controler);
+        instanceModule = require('./routes/' + req.message.controller);
         router.use(path, instanceModule);
         next();
     }
