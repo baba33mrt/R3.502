@@ -9,7 +9,7 @@ const passport = require("passport");
 const LocalStrategy = require('passport-local').Strategy;
 const multer = require('multer');
 
-const {checkPassword} = require('./utils/CryptoManager');
+const { checkPassword } = require('./utils/CryptoManager');
 
 require('dotenv').config();
 
@@ -36,10 +36,10 @@ hbs.registerHelper('compare', function(lvalue, rvalue, options) {
         throw new Error("Handlerbars Helper 'compare' needs 2 parameters");
     const operator = options.hash.operator || "==";
     const operators = {
-        '==': function (l, r) {
+        '==': function(l, r) {
             return l == r;
         },
-        '===': function (l, r) {
+        '===': function(l, r) {
             return l === r;
         }
     };
@@ -81,7 +81,7 @@ if (global.config.mongoose.used) {
 
 
 
-    if (global.config.mongoose.schemaSystem === "JSON"){
+    if (global.config.mongoose.schemaSystem === "JSON") {
         // chargement des schémas depuis le fichier de configuration JSON dans une variable
         const database_schemas = JSON.parse(fs.readFileSync("database_schema.json", 'utf8'));
         // Initialisation de chaque schéma par association entre le schéma et la collection
@@ -92,9 +92,9 @@ if (global.config.mongoose.used) {
     }
 
 
-    if (global.config.mongoose.schemaSystem === "manager"){
+    if (global.config.mongoose.schemaSystem === "manager") {
         const datanaseManager = require("./utils/databaseManager")
-        for (let modelName in datanaseManager){
+        for (let modelName in datanaseManager) {
             global.schemas[modelName] = datanaseManager[modelName]
         }
     }
@@ -154,7 +154,7 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(id, done) {
-    global.schemas["Users"].findOne({uuid: id}, function(err, user) {
+    global.schemas["Users"].findOne({ uuid: id }, function(err, user) {
         done(err, user);
     });
 });
@@ -164,7 +164,7 @@ passport.use(new LocalStrategy(
     // Version du code pour mongoDB via mongoose
     function(username, password, done) {
         global.schemas["Users"].findOne({
-            email: username
+            username: username
         }, function(err, user) {
             if (err) {
                 return done(err);
