@@ -1,0 +1,10 @@
+{{> head}}
+<h1>{{title}}</h1>
+<ul>
+  {{#each tickets}}
+    <li>
+      <a href="/dashboard/tickets/{{this._id}}">{{this.sujet}}</a> - {{this.etat}}
+    </li>
+  {{/each}}
+</ul>
+{{> footer}}

@@ -26,7 +26,7 @@ global.actions_json = JSON.parse(fs.readFileSync("./routes/config_actions.json",
 
 const hbs = require('hbs');
 
-hbs.registerPartials(__dirname + '/views/partials', function() {
+hbs.registerPartials(path.join(__dirname + '/views/partials'), function() {
     console.log('partials registered');
 });
 
@@ -52,6 +52,7 @@ hbs.registerHelper('compare', function(lvalue, rvalue, options) {
         return options.inverse(this);
     }
 });
+//MongoDB connection
 if (global.config.mongodb.used) {
     global.db = {};
     const mongoClient = require('mongodb').MongoClient;
@@ -199,7 +200,7 @@ require('./dynamicRouter')(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    res.render('404', createError(404));
+    res.status(404).render('404');
 });
 
 // error handler
@@ -207,7 +208,6 @@ app.use(function(err, req, res, next) {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
-
     // render the error page
     res.status(err.status || 500);
     res.render('error');

@@ -1,0 +1,23 @@
+<form action="/api/tickets/new" method="POST">
+  <div>
+    <label for="client">Client :</label>
+    <input type="text" id="client" name="client" required>
+  </div>
+  <div>
+    <label for="origine">Origine :</label>
+    <select id="origine" name="origine[type]">
+      <option value="telephone">Téléphone</option>
+      <option value="mail">Email</option>
+    </select>
+    <input type="text" name="origine[data]" placeholder="Numéro de téléphone ou email">
+  </div>
+  <div>
+    <label for="sujet">Sujet :</label>
+    <input type="text" id="sujet" name="sujet" required>
+  </div>
+  <div>
+    <label for="message">Message :</label>
+    <textarea id="message" name="message" required></textarea>
+  </div>
+  <button type="submit">Créer le ticket</button>
+</form>
