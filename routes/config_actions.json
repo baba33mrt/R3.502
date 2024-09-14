@@ -2,7 +2,7 @@
     "GET/": {
         "controller": "getView",
         "view": "login",
-        "title": "Authentification"
+        "title": "Login"
     },
     "GET/dashboard": {
         "controller": "getView",
@@ -32,11 +32,6 @@
             "phone"
         ]
     },
-    "GET/dashboard/tickets/new" : {
-        "controller": "getView",
-        "view": "newTicket",
-        "title": "Création d'un nouveau ticket"
-    },
     "GET/admin/users/new": {
         "controller" : "nosql/findMultipleCollections",
         "collections" : [
@@ -53,5 +48,15 @@
     },
     "POST/api/tickets/new": {
         "controller": "nosql/tickets"
+    },
+    "GET/dashboard/hotliner": {
+        "controller": "getView",
+        "view": "DashHotliner",
+        "title": "Bienvenue dans le framework Node/Express"
+    },
+    "GET/dashboard/hotliner/newticket": {
+        "controller": "getView",
+        "view": "newTicket",
+        "title": "Création d'un nouveau ticket"
     }
 }

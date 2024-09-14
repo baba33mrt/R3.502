@@ -1,3 +1,4 @@
+/* Global styles */
 body {
     margin: 0;
     padding: 0;
@@ -6,7 +7,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: linear-gradient(45deg, rgb(47, 224, 255), rgb(5, 122, 240));
+    background: linear-gradient(45deg, rgb(208, 206, 212), rgb(208, 206, 212));
     font-family: "Arial", cursive;
 }
 
@@ -19,9 +20,9 @@ body {
 
 .center h1 {
     font-size: 2em;
-    border-left: 5px solid dodgerblue;
+    border-left: 5px solid #D74C55;
     padding: 0px;
-    color: #000;
+    color: #D74C55;
     letter-spacing: 5px;
     margin-bottom: 40px;
     font-weight: bold;
@@ -68,7 +69,7 @@ body {
     width: 90%;
     border: 2px solid #000;
     outline: none;
-    background: rgb(127, 176, 224);
+    background: #DCA35B;
     padding: 4px 10px;
     border-radius: 10px;
     font-size: 1.2em;
@@ -110,7 +111,7 @@ body {
 
 .center .inputbox [type="button"] {
     width: 50%;
-    background: dodgerblue;
+    background: #DCA35B;
     color: #fff;
     border: #fff;
 }
@@ -163,51 +164,34 @@ li a {
     text-decoration: none;
 }
 
-/* Change the link color to #111 (black) on hover */
 li a:hover {
     background-color: #111;
 }
 
-/* Add a black background color to the top navigation */
 .topnav {
-    background-color: #333;
+    background-color: #3A3E4C;
     overflow: hidden;
     top: 0;
     position: fixed;
     width: 100%;
 }
 
-/* Style the links inside the navigation bar */
 .topnav a {
     float: left;
-    color: #f2f2f2;
+    color: #F3F6F2;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
 }
 
-/* Change the color of links on hover */
 .topnav a:hover {
-    background-color: #ddd;
+    background-color: #DCA35B;
     color: black;
 }
 
-/* Add a color to the active/current link */
 .topnav a.active {
-    background-color: #04AA6D;
-    color: white;
-}
-
-/* Change the color of links on hover */
-.topnav a:hover {
-    background-color: #ddd;
-    color: black;
-}
-
-/* Add a color to the active/current link */
-.topnav a.active {
-    background-color: #04AA6D;
+    background-color: #D74C55;
     color: white;
 }
 
@@ -219,3 +203,201 @@ table.dataTable {
     border-spacing: 0;
     background-color: rgba(255, 255, 255, 0.747);
 }
+
+/* Modifications spécifiques pour le dashboard */
+/* Container for the ticket actions */
+.ticket-actions {
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto; 
+    overflow: hidden; 
+}
+
+/* Title styling */
+.ticket-actions h2 {
+    font-size: 24px;
+    color: #3A3E4C;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Button to create a new ticket as a link */
+.create-ticket-btn {
+    display: inline-block;
+    max-width: 100%; 
+    padding: 10px 20px;
+    background-color: #DCA35B;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.3s;
+    box-sizing: border-box;
+}
+
+.create-ticket-btn:hover {
+    background-color: #B58345;
+}
+
+/* Search form styling */
+.search-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.search-input {
+    padding: 10px;
+    width: 70%;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    background-color: #F3F6F2;
+    font-size: 14px;
+    color: #3A3E4C;
+}
+
+.search-btn {
+    padding: 10px 20px;
+    background-color: #D74C55;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-btn:hover {
+    background-color: #B33E45;
+}
+
+/* Ticket list styling */
+.ticket-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.ticket-item {
+    padding: 15px;
+    background-color: #F9F9F9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.ticket-item p {
+    margin: 5px 0;
+    color: #3A3E4C;
+}
+
+.ticket-item strong {
+    color: #D74C55;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .search-form {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .search-input {
+        width: 100%;
+    }
+
+    .create-ticket-btn, .search-btn {
+        width: 100%;
+    }
+}
+
+/* Style pour le formulaire de ticket */
+.ticket-form {
+    position: relative;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 40px auto;
+  }
+  
+  .ticket-form h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 14px;
+  }
+  
+  .form-group input[type="text"],
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease-in-out;
+  }
+  
+  .form-group input[type="text"]:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: #D74C55;
+    outline: none;
+  }
+  
+  .form-group select {
+    cursor: pointer;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+  }
+  
+  /* Style du bouton */
+  .submit-btn {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #D74C55;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+  }
+  
+  .submit-btn:hover {
+    background-color: #B33E45;
+  }
+  
+  /* Style responsive pour écrans plus petits */
+  @media (max-width: 600px) {
+    .ticket-form {
+      padding: 30px;
+      max-width: 100%; /* S'ajuste à la taille de l'écran */
+    }
+  
+    .submit-btn {
+      padding: 12px;
+    }
+  }
