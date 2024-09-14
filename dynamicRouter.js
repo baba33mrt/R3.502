@@ -23,7 +23,7 @@ function manageAction(req, res, next) {
         path = path.split('?')[0];
         if (path.split('/').length > 0) path = '/' + path.split('/')[1]
     } else if (path.split('/').length > 0)
-    console.log(path)
+        console.log(path)
     const type = req.method;
     // On défini la clé de l'annuaire config_actions.json dans une variable "action"
     req.message.action = type + path;

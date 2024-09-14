@@ -33,12 +33,24 @@
         ]
     },
     "GET/admin/users/new": {
-        "controller" : "nosql/findMultipleCollections",
-        "collections" : [
+        "controller": "nosql/findMultipleCollections",
+        "collections": [
             "Groups"
         ],
         "view": "admin-newUser",
         "title": "Création d'un nouvel utilisateur"
+    },
+    "GET/dashboard/tickets": {
+        "controller": "nosql/api/ticketsController",
+        "action": "listTickets",
+        "view": "ticketList",
+        "title": "Liste des Tickets"
+    },
+    "GET/dashboard/tickets/:id": {
+        "controller": "nosql/api/ticketsController",
+        "action": "getTicketById",
+        "view": "ticketDetail",
+        "title": "Détails du Ticket"
     },
     "POST/api/users/new": {
         "controller": "nosql/insertOne",
@@ -59,4 +71,5 @@
         "view": "newTicket",
         "title": "Création d'un nouveau ticket"
     }
+
 }
