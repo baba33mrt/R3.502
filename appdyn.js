@@ -8,7 +8,7 @@ const session = require('express-session');
 const passport = require("passport");
 const LocalStrategy = require('passport-local').Strategy;
 const multer = require('multer');
-
+const permissionMiddleware = require('./middleware/permissions')
 const {checkPassword} = require('./utils/CryptoManager');
 
 require('dotenv').config();
@@ -147,6 +147,7 @@ app.use(session({
         secure: false
     } // à mettre à true uniquement avec un site https.
 }));
+// app.use(permissionMiddleware)
 app.use(passport.initialize());
 app.use(passport.session());
 passport.serializeUser(function(user, done) {
@@ -155,6 +156,7 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(id, done) {
     global.schemas["Users"].findOne({uuid: id}, function(err, user) {
+        console.log(user)
         done(err, user);
     });
 });
@@ -164,7 +166,7 @@ passport.use(new LocalStrategy(
     // Version du code pour mongoDB via mongoose
     function(username, password, done) {
         global.schemas["Users"].findOne({
-            email: username
+            username: username
         }, function(err, user) {
             if (err) {
                 return done(err);

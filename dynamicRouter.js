@@ -17,13 +17,14 @@ function dynamicRouter(app) {
 vers le bon contrôleur en fonction de l'action du pathname  */
 function manageAction(req, res, next) {
     req.message = {};
-    console.log(req.originalUrl)
+    // console.log(req.originalUrl)
     let path = req.originalUrl; // Le pathname après le port 3040 dans l'URL.
     if (path.includes("?")) {
         path = path.split('?')[0];
         if (path.split('/').length > 0) path = '/' + path.split('/')[1]
-    } else if (path.split('/').length > 0)
-    console.log(path)
+    } else if (path.split('/').length > 0) {
+         //console.log(path)}
+    }
     const type = req.method;
     // On défini la clé de l'annuaire config_actions.json dans une variable "action"
     req.message.action = type + path;
@@ -36,7 +37,7 @@ function manageAction(req, res, next) {
     /***************************************************************************************************** */
     /* Boucle de récupération des paramètres de l'action du fichier config_actions.json */
     for (let param in global.actions_json[req.message.action]) {
-        console.log(param)
+        // console.log(param)
         req.message[param] = (global.actions_json[req.message.action])[param];
     }
     // console.log('req.message dans dynamicRouteur : ', req.message);
@@ -54,7 +55,7 @@ function manageAction(req, res, next) {
         // console.log("Erreur: Pas d'action dans l'annuaire config_actions.json : " + path);
         next();
     } else {
-        instanceModule = require('./routes/' + req.message.controler);
+        instanceModule = require('./routes/' + req.message.controller);
         router.use(path, instanceModule);
         next();
     }

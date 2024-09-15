@@ -38,6 +38,7 @@ router.route('/').post(function (req, res) {
                 // on refait une requête pour récupérer tous les enregs du modelName
                 global.schemas[req.message.modelName].find({}, function (err, result2) {
                     console.log("result into deleteUser : ", result2);
+                    if (req)
                     res.render(req.message.view, {
                         title: req.message.title,
                         data: result2
