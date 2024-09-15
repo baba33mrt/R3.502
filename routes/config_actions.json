@@ -2,7 +2,7 @@
     "GET/": {
         "controller": "getView",
         "view": "login",
-        "title": "Login"
+        "title": "Authentification"
     },
     "GET/dashboard": {
         "controller": "getView",
@@ -59,7 +59,8 @@
 
     },
     "POST/api/tickets/new": {
-        "controller": "nosql/tickets"
+        "controller": "nosql/api/ticketsController",
+        "action": "createTicket"
     },
     "GET/dashboard/hotliner": {
         "controller": "getView",
@@ -71,5 +72,4 @@
         "view": "newTicket",
         "title": "Création d'un nouveau ticket"
     }
-
 }
