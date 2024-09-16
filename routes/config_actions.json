@@ -29,6 +29,18 @@
       "phone"
     ]
   },
+  "GET/dashboard/tickets/": {
+    "controller": "nosql/api/ticketsController",
+    "action": "listTickets",
+    "view": "ticketList",
+    "title": "Liste des Tickets"
+  },
+  "GET/dashboard/tickets/:id": {
+    "controller": "nosql/api/ticketsController",
+    "action": "getTicketById",
+    "view": "ticketDetail",
+    "title": "Détails du Ticket"
+  },
   "GET/dashboard/tickets/new": {
     "controller": "getView",
     "view": "newTicket",

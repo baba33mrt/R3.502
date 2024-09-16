@@ -6,6 +6,9 @@
 const app = require('../appdyn');
 const debug = require('debug')('myexpresshbsapp:server');
 const http = require('http');
+const logger = require("../utils/logger")
+global.Logger = new logger()
+
 
 /**
  * Get port from environment and store in Express.

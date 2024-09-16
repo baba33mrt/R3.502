@@ -8,9 +8,7 @@ const session = require('express-session');
 const passport = require("passport");
 const LocalStrategy = require('passport-local').Strategy;
 const multer = require('multer');
-const permissionMiddleware = require('./middleware/permissions')
-const { checkPassword } = require('./utils/CryptoManager');
-
+const {checkPassword} = require('./utils/CryptoManager');
 require('dotenv').config();
 
 global.upload = multer({
@@ -26,7 +24,7 @@ global.actions_json = JSON.parse(fs.readFileSync("./routes/config_actions.json",
 
 const hbs = require('hbs');
 
-hbs.registerPartials(path.join(__dirname + '/views/partials'), function() {
+hbs.registerPartials(__dirname + '/views/partials', function() {
     console.log('partials registered');
 });
 
@@ -36,10 +34,10 @@ hbs.registerHelper('compare', function(lvalue, rvalue, options) {
         throw new Error("Handlerbars Helper 'compare' needs 2 parameters");
     const operator = options.hash.operator || "==";
     const operators = {
-        '==': function(l, r) {
+        '==': function (l, r) {
             return l == r;
         },
-        '===': function(l, r) {
+        '===': function (l, r) {
             return l === r;
         }
     };
@@ -52,7 +50,6 @@ hbs.registerHelper('compare', function(lvalue, rvalue, options) {
         return options.inverse(this);
     }
 });
-//MongoDB connection
 if (global.config.mongodb.used) {
     global.db = {};
     const mongoClient = require('mongodb').MongoClient;
@@ -90,6 +87,7 @@ if (global.config.mongoose.used) {
             global.schemas[modelName] = new mongoose.model(modelName, database_schemas[modelName].schema,
                 database_schemas[modelName].collection);
         }
+
     }
 
 
@@ -148,6 +146,7 @@ app.use(session({
         secure: false
     } // à mettre à true uniquement avec un site https.
 }));
+// app.use(permissionMiddleware)
 app.use(passport.initialize());
 app.use(passport.session());
 passport.serializeUser(function(user, done) {
@@ -156,6 +155,7 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(id, done) {
     global.schemas["Users"].findOne({uuid: id}, function(err, user) {
+        console.log(user)
         done(err, user);
     });
 });
@@ -200,7 +200,7 @@ require('./dynamicRouter')(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    res.status(404).render('404');
+    res.render('404', createError(404));
 });
 
 // error handler
