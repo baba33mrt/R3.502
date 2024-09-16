@@ -1,75 +1,75 @@
 {
-    "GET/": {
-        "controller": "getView",
-        "view": "login",
-        "title": "Authentification"
-    },
-    "GET/dashboard": {
-        "controller": "getView",
-        "view": "index",
-        "title": "Bienvenue dans le framework Node/Express R504",
-        "path_minismall": "/home/supervisor/Documents/MiniSmall",
-        "test": "je suis un test :)",
-        "coucou": "salut c'est moi",
-        "hello": "Hello world ! 👀"
-    },
-    "GET/logout": {
-        "controller": "logout",
-        "view": "login",
-        "title": "Bienvenue dans le framework Node/Express"
-    },
-    "GET/api/users": {
-        "controller": "nosql/api/findReturnSpecific",
-        "modelName": "Users",
-        "return_type": "application/json",
-        "return_data": [
-            "uuid",
-            "roles",
-            "username",
-            "fitstName",
-            "lastName",
-            "email",
-            "phone"
-        ]
-    },
-    "GET/admin/users/new": {
-        "controller": "nosql/findMultipleCollections",
-        "collections": [
-            "Groups"
-        ],
-        "view": "admin-newUser",
-        "title": "Création d'un nouvel utilisateur"
-    },
-    "GET/dashboard/tickets": {
-        "controller": "nosql/api/ticketsController",
-        "action": "listTickets",
-        "view": "ticketList",
-        "title": "Liste des Tickets"
-    },
-    "GET/dashboard/tickets/:id": {
-        "controller": "nosql/api/ticketsController",
-        "action": "getTicketById",
-        "view": "ticketDetail",
-        "title": "Détails du Ticket"
-    },
-    "POST/api/users/new": {
-        "controller": "nosql/insertOne",
-        "redirect": "/admin/users?status=success",
-        "modelName": "Users"
-
-    },
-    "POST/api/tickets/new": {
-        "controller": "nosql/api/ticketsController",
-        "action": "createTicket"
-    },
-    "GET/dashboard/hotliner": {
-        "controller": "getView",
-        "view": "DashHotliner",
-        "title": "Bienvenue dans le framework Node/Express"
-    },
-    "GET/dashboard/hotliner/newticket": {
-        "controller": "getView",
-        "view": "newTicket",
-        "title": "Création d'un nouveau ticket"
-    }
+  "GET/": {
+    "controller": "getView",
+    "view": "login",
+    "title": "Authentification"
+  },
+  "GET/dashboard": {
+    "controller": "getView",
+    "view": "index",
+    "title": "Bienvenue dans le framework Node/Express R504",
+    "path_minismall": "/home/supervisor/Documents/MiniSmall"
+  },
+  "GET/logout": {
+    "controller": "logout",
+    "view": "login",
+    "title": "Bienvenue dans le framework Node/Express"
+  },
+  "GET/api/users": {
+    "controller": "nosql/api/findReturnSpecific",
+    "modelName": "Users",
+    "return_type": "application/json",
+    "return_data": [
+      "uuid",
+      "roles",
+      "username",
+      "fitstName",
+      "lastName",
+      "email",
+      "phone"
+    ]
+  },
+  "GET/dashboard/tickets/": {
+    "controller": "nosql/api/ticketsController",
+    "action": "listTickets",
+    "view": "ticketList",
+    "title": "Liste des Tickets"
+  },
+  "GET/dashboard/tickets/:id": {
+    "controller": "nosql/api/ticketsController",
+    "action": "getTicketById",
+    "view": "ticketDetail",
+    "title": "Détails du Ticket"
+  },
+  "GET/dashboard/tickets/new": {
+    "controller": "getView",
+    "view": "newTicket",
+    "title": "Création d'un nouveau ticket"
+  },
+  "GET/admin/users/new": {
+    "controller": "nosql/findMultipleCollections",
+    "collections": [
+      "Groups"
+    ],
+    "view": "admin-newUser",
+    "title": "Création d'un nouvel utilisateur"
+  },
+  "POST/api/users/new": {
+    "controller": "nosql/api/userManager",
+    "redirect": "/admin/users?status=success",
+    "modelName": "Users"
+  },
+  "DELETE/api/users/delete": {
+    "controller": "nosql/api/userManager",
+    "action": "createTicket"
+  },
+  "POST/api/tickets/new": {
+    "controller": "nosql/api/ticketsController",
+    "action": "createTicket"
+  },
+  "GET/dashboard/hotliner": {
+    "controller": "getView",
+    "view": "DashHotliner",
+    "title": "Bienvenue dans le framework Node/Express"
+  }
 }
