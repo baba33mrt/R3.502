@@ -9,7 +9,15 @@ const database = {
     Sessions: loadSchema("Sessions")
 }
 
+
 module.exports = database;
+
+const Ticket = require('./models/ticket');
+
+module.exports = {
+    Ticket,
+    // Ajoutez les autres modèles ici, s'il y en a
+};
 
 function loadSchema(filename) {
     try {
@@ -20,4 +28,3 @@ function loadSchema(filename) {
         return null;
     }
 }
-
