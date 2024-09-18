@@ -1,0 +1,55 @@
+ <!-- Avant d'utiliser ce tempalte hbs il faudra modifier le config actions pour pouvoir renvoyer un id, ou sinon, on fait sans ça,
+ et on met l'id directemment dans le formulaire, et il ira le chercher, c'est plus simple
+ je pense que nous devrions faire comme ça - Mohamad -->
+<div class="ticket-modification-container">
+    <!-- Ticket modification title -->
+    <h2 class="modification-title">Modification ticket</h2>
+
+    <!-- Ticket details form -->
+    <div class="ticket-details-box">
+        <form action="/update-ticket" method="POST">
+            <!-- Ticket header: Subject / Ticket number -->
+            <div class="ticket-header">
+                <input type="text" placeholder="Sujet / N°Ticket" name="ticket_subject" required />
+            </div>
+
+            <!-- Ticket fields: Client, Level, Origin, Type -->
+            <div class="ticket-fields">
+                <div class="field-group">
+                    <label for="client_name">Nom client</label>
+                    <input type="text" name="client_name" id="client_name" required />
+                </div>
+                <div class="field-group">
+                    <label for="level">Level</label>
+                    <input type="text" name="level" id="level" required />
+                </div>
+                <div class="field-group">
+                    <label for="origin">Origine</label>
+                    <input type="text" name="origin" id="origin" required />
+                </div>
+                <div class="field-group">
+                    <label for="request_type">Type demande</label>
+                    <input type="text" name="request_type" id="request_type" required />
+                </div>
+            </div>
+
+            <!-- Message and resolution areas -->
+            <div class="message-resolution-section">
+                <div class="textarea-group">
+                    <label for="message">Message</label>
+                    <textarea name="message" id="message" rows="6" required></textarea>
+                </div>
+                <div class="textarea-group">
+                    <label for="resolution">Résolution</label>
+                    <textarea name="resolution" id="resolution" rows="6" required></textarea>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="action-buttons">
+                <button type="submit" class="resolve-btn">Résoudre</button>
+                <button type="submit" class="close-btn">Clôturer</button>
+            </div>
+        </form>
+    </div>
+</div>
