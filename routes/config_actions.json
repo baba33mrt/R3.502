@@ -7,7 +7,7 @@
   "GET/dashboard": {
     "controller": "getView",
     "view": "index",
-    "title": "Bienvenue dans le framework Node/Express R504",
+    "title": "Binvenue dans BKM Tickets.",
     "path_minismall": "/home/supervisor/Documents/MiniSmall"
   },
   "GET/logout": {
@@ -70,6 +70,11 @@
   "GET/dashboard/hotliner": {
     "controller": "getView",
     "view": "DashHotliner",
-    "title": "Bienvenue dans le framework Node/Express"
+    "title": "Dashboard Hotliner"
+  },
+  "GET/dashboard/modifTicket": {
+    "controller": "getView",
+    "view": "modifTicket",
+    "title": "Modification du ticket"
   }
 }

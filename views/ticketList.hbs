@@ -1,9 +1,13 @@
-<div>
-    <h1>{{title}}</h1>
-    <ul>
+<!-- Je ne comprends rien a ce que vous avez voulu faire ici - Mohamad-->
+<div class="ticket-list-container">
+    <h1 class="ticket-list-title">{{title}}</h1>
+    <ul class="ticket-list">
         {{#each tickets}}
-            <li>
-                <a href="/dashboard/tickets/{{this._id}}">{{this.sujet}}</a> - {{this.etat}}
+            <li class="ticket-item {{this.etat}}">
+                <a href="/dashboard/tickets/{{this._id}}" class="ticket-link">
+                    <span class="ticket-subject">{{this.sujet}}</span> 
+                    <span class="ticket-status">{{this.etat}}</span>
+                </a>
             </li>
         {{/each}}
     </ul>
