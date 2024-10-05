@@ -3,6 +3,14 @@ const router = express.Router();
 
 /*  GET view page without to access to the database */
 router.get('/', function(req, res, next) {
+    //
+    // if (!req.session.passport?._user) {
+    //     res.redirect('/'); // affichage boîte de login si pas authentifié
+    // }
+    // else if (req.originalUrl === "/"){
+    //     res.redirect("/dashboard")
+    // } else {
+
     console.log("from getView ");
     let params_render = {};
     for (let param in global.actions_json[req.message.action]) {
@@ -10,6 +18,7 @@ router.get('/', function(req, res, next) {
     }
     //console.log("params_render :", params_render);
     res.render(req.message.view, params_render);
+    // }
 });
 
 module.exports = router;
