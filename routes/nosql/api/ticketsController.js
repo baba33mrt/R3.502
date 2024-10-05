@@ -2,6 +2,20 @@ const express = require('express');
 const router = express.Router();
 const Ticket = schemas.Tickets;
 
+
+// Route pour obtenir un ticket par son ID
+router.get('/:id', async (req, res) => {
+    try {
+        const ticket = await Ticket.findById(req.params.id).populate('client').populate('projet').populate('author');
+        if (!ticket) {
+            return res.status(404).render('error', { message: 'Ticket introuvable' });
+        }
+        res.render('ticketDetail', { title: res.locals.title, ticket });
+    } catch (err) {
+        res.status(500).render('error', { message: err.message });
+    }
+});
+
 // Route pour créer un ticket
 router.post('/', async (req, res) => {
     try {
@@ -28,6 +42,7 @@ router.post('/', async (req, res) => {
 
 // Route pour lister tous les tickets
 router.get('/', async (req, res) => {
+    console.log(req.params)
     try {
         const tickets = await Ticket.find().populate('client').populate('projet').populate('author');
         res.render('ticketList', { title: res.locals.title, tickets });
@@ -36,17 +51,5 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Route pour obtenir un ticket par son ID
-router.get('/:id', async (req, res) => {
-    try {
-        const ticket = await Ticket.findById(req.params.id).populate('client').populate('projet').populate('author');
-        if (!ticket) {
-            return res.status(404).render('error', { message: 'Ticket introuvable' });
-        }
-        res.render('ticketDetail', { title: res.locals.title, ticket });
-    } catch (err) {
-        res.status(500).render('error', { message: err.message });
-    }
-});
 
 module.exports = router;
