@@ -155,7 +155,7 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(id, done) {
     global.schemas["Users"].findOne({uuid: id}, function(err, user) {
-        console.log(user)
+        //console.log(user)
         done(err, user);
     });
 });
