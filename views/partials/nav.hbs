@@ -1,7 +1,23 @@
-<ul>
-    <li><a href="/dashboard">Accueil</a></li>
-    <li><a href="/logout">Déconnexion</a></li>
-    <li><a href="/dashboard/tickets/new">New Ticket</a></li>
-    <li><a href="/dashboard/hotliner">Dashboard Hotliner</a></li>
-    <li><a href="/dashboard/modifTicket">Modification Ticket</a></li>
-</ul>
+<div class="flex justify-between items-center w-full">
+    <ul class="flex space-x-4 text-white font-semibold">
+        <li><a href="/dashboard" class="hover:text-[#DCA35B]">Accueil</a></li>
+        <li><a href="/dashboard/tickets" class="hover:text-[#DCA35B]">Tickets</a></li>
+
+
+    </ul>
+
+    <form action="/dashboard/tickets/search" method="GET" class="flex space-x-2">
+        <label>
+            <input type="text" name="search" placeholder="Rechercher un ticket..."
+                   class="p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </label>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            Rechercher
+        </button>
+    </form>
+
+    <ul class="flex space-x-4 text-white font-semibold">
+        <li><a href="/admin" class="hover:text-[#DCA35B]">Administration</a></li>
+        <li><a href="/logout" class="hover:text-[#DCA35B]">Déconnexion</a></li>
+    </ul>
+</div>

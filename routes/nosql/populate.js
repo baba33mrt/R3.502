@@ -5,7 +5,7 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
 
-/* GET users listing. */
+/* GET users.hbs listing. */
 router.get('/', function (req, res, next) {
     if ((req.session.passport) && (req.session.passport.user != null)) {
         global.schemas[req.message.modelName].find({}).populate(req.message.pop_ref)

@@ -1,8 +1,572 @@
-{{> head}}
-<h1>{{title}}</h1>
-<p><strong>Sujet :</strong> {{ticket.sujet}}</p>
-<p><strong>Message :</strong> {{ticket.message}}</p>
-<p><strong>État :</strong> {{ticket.etat}}</p>
-<p><strong>Auteur :</strong> {{ticket.author.username}}</p>
-<!-- Ajoutez d'autres détails si nécessaire -->
-{{> footer}}
+{{#if error}}
+    <style>
+        .ticket-container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+    </style>
+    <div class="ticket-container bg-white rounded-lg shadow-lg p-6 space-y-8 mt-12 mb-12">
+        <div class="ticket-title text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Ticket non trouvé</h1>
+        </div>
+        <div class="flex justify-center">
+            <div class="bg-red-100 p-6 rounded-lg text-center">
+                <h3 class="font-bold text-lg mb-2">Le ticket demandé n'existe pas ou a été supprimé.</h3>
+                <a href="/dashboard" class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 mt-4 inline-block">Revenir en lieu sûr</a>
+            </div>
+        </div>
+    </div>
+{{else}}
+    <style>
+        .ticket-container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+    </style>
+    <div class="ticket-container bg-white rounded-lg shadow-lg p-6 space-y-8 mt-12 mb-12">
+
+        <!-- Titre du ticket -->
+        <div class="ticket-title text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-6">{{ticket.subject}}</h1>
+        </div>
+
+        <!-- Informations principales -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Informations sur le client -->
+            <div class="bg-blue-100 p-4 rounded-lg">
+                <h3 class="font-bold text-lg mb-3">Informations du client</h3>
+                <p><strong>Entreprise :</strong> {{ticket.client.entrepriseName}}</p>
+                <p><strong>Email :</strong> <a href="mailto:{{ticket.client.email}}"
+                                               class="text-blue-600 underline">{{ticket.client.email}}</a></p>
+                <p><strong>Téléphone :</strong> <a href="tel:{{ticket.client.technicalPhone}}"
+                                                   class="text-blue-600 underline">{{ticket.client.technicalPhone}}</a>
+                </p>
+            </div>
+
+            <!-- Informations sur le ticket -->
+            <div class="bg-green-100 p-4 rounded-lg">
+                <h3 class="font-bold text-lg mb-3">Détails du ticket</h3>
+                <p><strong>Origine :</strong> {{ticket.origin}}</p>
+                <p><strong>Projet :</strong> {{ticket.project.name}}</p>
+                <p><strong>Description :</strong> {{ticket.content}}</p>
+                <p><strong>Statut :</strong> {{ticket.state}}</p>
+                <p><strong>Ticket affecté à :</strong> {{ticket.affected.lastName}} {{ticket.affected.firstName}}</p>
+
+            </div>
+        </div>
+
+        <!-- Informations supplémentaires -->
+        <div class="ticket-data bg-gray-50 p-4 rounded-lg">
+            <h3 class="font-bold text-xl mb-4">Ticket créé par</h3>
+            <div class="comment-item p-3 bg-white border rounded-lg">
+                <p><strong>{{ticket.author.firstName}} {{ticket.author.lastName}}</strong></p>
+                <p class="text-gray-600">{{ticket.author.email}}</p>
+                <span class="text-gray-500 text-sm">Publié le {{formatDateTime ticket.createAt}}</span>
+            </div>
+        </div>
+
+        <!-- Liste des commentaires -->
+        <div class="comment-list bg-gray-50 p-4 rounded-lg space-y-4">
+            <h3 class="font-bold text-xl mb-4">Commentaires</h3>
+            {{#each ticket.comments}}
+                <div class="comment-item p-3 bg-white border rounded-lg">
+                    <p><strong>{{this.author.firstName}} {{this.author.lastName}}</strong></p>
+                    <p class="text-gray-600">{{this.author.email}}</p>
+                    <div class="ticket-container">{{{this.content}}}</div>
+                    <span class="text-gray-500 text-sm">Publié le {{formatDateTime this.date}}</span>
+                </div>
+            {{else}}
+                <p class="text-gray-600">Aucun commentaire pour le moment.</p>
+            {{/each}}
+        </div>
+
+        <!-- Editeur de commentaire -->
+        {{#if ticket.open}}
+            <div class="comment-editor flex flex-col space-y-4 mt-6">
+                <h3 class="font-bold text-xl mb-2">Ajouter un commentaire</h3>
+
+                <!-- Formulaire pour ajouter un commentaire -->
+                <form id="comment-form" method="POST" action="/api/tickets/comment/add" enctype="application/x-www-form-urlencoded">
+                    <label for="comment-editor"></label>
+                    <textarea id="comment-editor" name="comment" class="w-full h-40 p-4 border rounded-lg"></textarea>
+                    <input type="hidden" name="ticketId" value="{{ticket.id}}">
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
+                    <div class="flex justify-end mt-4">
+                        <button id="submit-comment" type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed" disabled>Publier le commentaire</button>
+                    </div>
+                </form>
+
+                <script>
+                    const notyf = new Notyf({
+                        position: {
+                            x: 'right',
+                            y: 'top'
+                        },
+                        duration: 3000
+                    });
+
+                    tinymce.init({
+                        selector: '#comment-editor',
+                        plugins: 'code anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                        toolbar: 'undo redo code | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+                        menubar: false,
+                        setup: function (editor) {
+                            editor.on('keyup change', function () {
+                                const commentContent = tinymce.get('comment-editor').getContent();
+                                document.getElementById('submit-comment').disabled = !commentContent.trim();
+                            });
+                        }
+                    });
+
+                    document.getElementById('comment-form').addEventListener('submit', function (event) {
+                        event.preventDefault();
+                        const commentContent = tinymce.get('comment-editor').getContent();
+
+                        if (!commentContent.trim()) {
+                            notyf.error("Il n'est pas possible d'envoyer un commentaire vide");
+                            return;
+                        }
+
+                        const formData = new URLSearchParams();
+                        formData.append('comment', commentContent);
+                        formData.append('ticketId', "{{ticket._id}}");
+                        formData.append('_csrf', document.querySelector('input[name="_csrf"]').value);
+
+                        fetch(this.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: formData.toString()
+                        })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            title: 'Succès',
+                                            text: 'Commentaire publié avec succès',
+                                            icon: 'success',
+                                            confirmButtonText: 'OK'
+                                        }).then(() => {
+                                            window.location.reload();
+                                        });
+                                    } else {
+                                        notyf.error("Une erreur s'est produite, réessayez plus tard");
+                                    }
+                                })
+                                .catch(error => {
+                                    notyf.error("Une erreur réseau s'est produite, réessayez plus tard");
+                                });
+                    });
+                </script>
+            </div>
+
+        {{else}}
+            <div class="comment-item p-3 bg-white border rounded-lg mt-6">
+                <p class="text-red-500 font-semibold">Ce ticket a été clôturé, vous ne pouvez pas ajouter de
+                    commentaire.</p>
+            </div>
+        {{/if}}
+
+        <!-- Actions sur le ticket -->
+        <div class="ticket-actions flex justify-end space-x-4 mt-6">
+            {{#if ticket.open}}
+                <button id="affect" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Affecter le ticket</button>
+                <button id="priority" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Changer la prioritée</button>
+                <button id="history" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Historique</button>
+                <button id="close" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700">Fermer le ticket</button>
+            {{else}}
+                <button id="open" class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">Réactiver
+                    le ticket
+                </button>
+            {{/if}}
+        </div>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{#if ticket.open}}
+        <script>
+
+            const affctButton = document.getElementById('affect');
+            if (affctButton) {
+                affctButton.addEventListener('click', function () {
+                    fetch('/api/users')
+                            .then(response => response.json())
+                            .then(users => {
+                                // Vérification des utilisateurs récupérés
+                                console.log("Utilisateurs récupérés :", users);
+
+                                // Créer les options de la liste déroulante
+                                const userOptions = users.map(user => `<option value="${user._id || user.id}">${user.username}</option>`).join('');
+
+                                Swal.fire({
+                                    title: 'Affecter ce ticket',
+                                    html: `
+                        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                        <label for="user-select">Choisissez un utilisateur :</label>
+                        <select id="user-select" class="swal2-select">
+                            ${userOptions}
+                        </select>
+                    `,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Confirmer',
+                                    cancelButtonText: 'Annuler',
+                                    preConfirm: () => {
+                                        // Récupérer la valeur sélectionnée
+                                        const userSelectElement = document.getElementById('user-select');
+                                        if (!userSelectElement) {
+                                            Swal.showValidationMessage('L\'élément <select> est introuvable');
+                                            return false;
+                                        }
+
+                                        const selectedUser = userSelectElement.value;
+                                        if (!selectedUser) {
+                                            Swal.showValidationMessage('Veuillez sélectionner un utilisateur');
+                                            return false;
+                                        }
+
+                                        console.log("User ID sélectionné :", selectedUser); // Vérifie la valeur sélectionnée
+                                        return selectedUser;
+                                    }
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        const selectedUser = result.value;
+
+                                        if (!selectedUser) {
+                                            console.error("Erreur : User ID non défini après sélection.");
+                                            return;
+                                        }
+
+                                        // Effectuer la requête pour affecter le ticket
+                                        fetch('/api/tickets/edit', {
+                                            method: 'PUT',
+                                            headers: {
+                                                'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({
+                                                type: 1,
+                                                id: '{{ticket._id}}', // Assurez-vous que cette valeur est correcte
+                                                userId: selectedUser
+                                            })
+                                        })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    if (data.success) {
+                                                        Swal.fire({
+                                                            title: 'Ticket affecté',
+                                                            text: `Le ticket a été affecté avec succès à l'utilisateur sélectionné.`,
+                                                            icon: 'success',
+                                                            confirmButtonText: 'OK'
+                                                        });
+                                                    } else {
+                                                        Swal.fire({
+                                                            title: 'Erreur',
+                                                            text: data.message || 'Une erreur s\'est produite.',
+                                                            icon: 'error',
+                                                            confirmButtonText: 'Fermer'
+                                                        });
+                                                    }
+                                                })
+                                                .catch(() => {
+                                                    Swal.fire({
+                                                        title: 'Erreur',
+                                                        text: 'Une erreur réseau s\'est produite.',
+                                                        icon: 'error',
+                                                        confirmButtonText: 'Fermer'
+                                                    });
+                                                });
+                                    }
+                                });
+                            })
+                            .catch(() => {
+                                Swal.fire({
+                                    title: 'Erreur',
+                                    text: 'Impossible de récupérer les utilisateurs.',
+                                    icon: 'error',
+                                    confirmButtonText: 'Fermer'
+                                });
+                            });
+                });
+            }
+
+
+            const priorityButton = document.getElementById('priority');
+            if (priorityButton) {
+                priorityButton.addEventListener('click', function () {
+                    Swal.fire({
+                        title: 'Changer la prioritée',
+                        html: `
+                                        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                                        <label for="user-select">Choisissez la nouvelle prioritée :</label>
+                                        <select id="user-select" class="swal2-select">
+                                            <option value="0">Faible</option>
+                                            <option value="1">Moyen</option>
+                                            <option value="2">Haut</option>
+                                            <option value="3">Urgent</option>
+                                            <option value="4">Critique</option>
+                                        </select>
+                                    `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Confirmer',
+                        cancelButtonText: 'Annuler',
+                        preConfirm: () => {
+                            // Récupérer la valeur sélectionnée
+                            const prioritySelectElement = document.getElementById('user-select');
+                            if (!prioritySelectElement) {
+                                Swal.showValidationMessage('L\'élément <select> est introuvable');
+                                return false;
+                            }
+
+                            const selectePriority = prioritySelectElement.value;
+                            if (!selectePriority) {
+                                Swal.showValidationMessage('Veuillez sélectionner une prioritée');
+                                return false;
+                            }
+                            return selectePriority;
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const selectePriority = result.value;
+
+                            if (!selectePriority) {
+                                console.error("Erreur : priority non défini après sélection.");
+                                return;
+                            }
+
+                            // Effectuer la requête pour affecter le ticket
+                            fetch('/api/tickets/edit', {
+                                method: 'PUT',
+                                headers: {
+                                    'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    type: 2,
+                                    id: '{{ticket._id}}', // Assurez-vous que cette valeur est correcte
+                                    priority: selectePriority
+                                })
+                            })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            Swal.fire({
+                                                title: 'Priorité changé',
+                                                text: `La priorité a été changé avec succès.`,
+                                                icon: 'success',
+                                                confirmButtonText: 'OK'
+                                            });
+                                        } else {
+                                            Swal.fire({
+                                                title: 'Erreur',
+                                                text: data.message || 'Une erreur s\'est produite.',
+                                                icon: 'error',
+                                                confirmButtonText: 'Fermer'
+                                            });
+                                        }
+                                    })
+                                    .catch(() => {
+                                        Swal.fire({
+                                            title: 'Erreur',
+                                            text: 'Une erreur réseau s\'est produite.',
+                                            icon: 'error',
+                                            confirmButtonText: 'Fermer'
+                                        });
+                                    });
+                        }
+                    });
+                });
+            }
+
+            const historyButton = document.getElementById("history");
+
+            if (historyButton) {
+                historyButton.addEventListener('click', function () {
+                    Swal.fire({
+                        title: "Historique",
+                        html: `
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg shadow-lg">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="py-2 px-4 text-gray-700 font-semibold">Date</th>
+                                <th class="py-2 px-4 text-gray-700 font-semibold">Utilisateur</th>
+                                <th class="py-2 px-4 text-gray-700 font-semibold">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each ticket.history}}
+                                <tr class="border-b">
+                                    <td class="py-2 px-4 text-gray-800">${new Date("{{this.date}}").toLocaleString('fr-FR', {
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit'
+                                    })}</td>
+                                    <td class="py-2 px-4 text-gray-800">{{this.user.lastName}} {{this.user.firstName}}</td>
+                                    <td class="py-2 px-4 text-gray-800">{{this.action}}</td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            `
+                    });
+                });
+            }
+
+
+            const closeButton = document.getElementById("close");
+
+            if (closeButton) {
+                closeButton.addEventListener('click', function () {
+                    Swal.fire({
+                        title: 'Fermer le ticket',
+                        html: `
+                <div>
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                    <label for="close-reason-editor">Raison de la fermeture :</label>
+                    <textarea id="close-reason-editor" class="w-full h-40 p-4 border rounded-lg"></textarea>
+                </div>
+            `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Confirmer la fermeture',
+                        cancelButtonText: 'Annuler',
+                        didOpen: () => {
+                            // Initialisation de TinyMCE une fois que le modal est ouvert
+                            tinymce.init({
+                                selector: '#close-reason-editor',
+                                plugins: 'textcolor',
+                                toolbar: 'bold italic underline | forecolor',
+                                menubar: false
+                            });
+                        },
+                        preConfirm: () => {
+                            const editorContent = tinymce.get('close-reason-editor').getContent();
+                            if (!editorContent) {
+                                Swal.showValidationMessage('Veuillez fournir une raison pour fermer ce ticket.');
+                            }
+                            return editorContent;
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const reason = result.value;
+
+                            fetch('/api/tickets/edit', {
+                                method: 'PUT',
+                                headers: {
+                                    'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                                    'Content-Type': 'application/json'},
+                                body: JSON.stringify({type: 3, id: "{{ticket._id}}", reason: reason})
+                            }).then(response => response.json()).then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Ticket fermé',
+                                        text: 'Le ticket a été fermé avec succès.',
+                                        icon: 'success',
+                                        confirmButtonText: 'Fermer'
+                                    }).then(() => window.location.reload());
+                                } else {
+                                    Swal.fire({
+                                        title: 'Erreur',
+                                        text: data.message || 'Une erreur s\'est produite lors de la fermeture du ticket.',
+                                        icon: 'error',
+                                        confirmButtonText: 'Fermer'
+                                    });
+                                }
+                            }).catch(() => {
+                                Swal.fire({
+                                    title: 'Erreur',
+                                    text: 'Une erreur réseau s\'est produite.',
+                                    icon: 'error',
+                                    confirmButtonText: 'Fermer'
+                                });
+                            });
+                        }
+                    });
+                });
+            }
+        </script>
+    {{else}}
+        <script>
+            const reactiveButton = document.getElementById('open');
+
+            if (reactiveButton) {
+                reactiveButton.addEventListener('click', function () {
+                    Swal.fire({
+                        title: 'Réouvrir le ticket',
+                        html: `
+                <div>
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                    <label for="close-reason-editor">Raison de la réouverture :</label>
+                    <textarea id="close-reason-editor" class="w-full h-40 p-4 border rounded-lg"></textarea>
+                </div>
+            `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Confirmer la réouverture',
+                        cancelButtonText: 'Annuler',
+                        didOpen: () => {
+                            // Initialisation de TinyMCE une fois que le modal est ouvert
+                            tinymce.init({
+                                selector: '#close-reason-editor',
+                                plugins: 'textcolor',
+                                toolbar: 'bold italic underline | forecolor',
+                                menubar: false
+                            });
+                        },
+                        preConfirm: () => {
+                            const editorContent = tinymce.get('close-reason-editor').getContent();
+                            if (!editorContent) {
+                                Swal.showValidationMessage('Veuillez fournir une raison pour réouvrir ce ticket.');
+                            }
+                            return editorContent;
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const reason = result.value;
+
+                            fetch('/api/tickets/edit', {
+                                method: 'PUT',
+                                headers: {
+                                    'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                                    'Content-Type': 'application/json'},
+                                body: JSON.stringify({type: 4, id: "{{ticket._id}}", reason: reason})
+                            }).then(response => response.json()).then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Ticket réouvert',
+                                        text: 'Le ticket a été réouvert avec succès.',
+                                        icon: 'success',
+                                        confirmButtonText: 'Fermer'
+                                    }).then(() => window.location.reload());
+                                } else {
+                                    Swal.fire({
+                                        title: 'Erreur',
+                                        text: data.message || 'Une erreur s\'est produite lors de la réouverture du ticket.',
+                                        icon: 'error',
+                                        confirmButtonText: 'Fermer'
+                                    });
+                                }
+                            }).catch(() => {
+                                Swal.fire({
+                                    title: 'Erreur',
+                                    text: 'Une erreur réseau s\'est produite.',
+                                    icon: 'error',
+                                    confirmButtonText: 'Fermer'
+                                });
+                            });
+                        }
+                    });
+                });
+            }
+        </script>
+    {{/if}}
+{{/if}}

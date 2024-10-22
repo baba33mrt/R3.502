@@ -1,0 +1,203 @@
+<!-- File d'Ariane -->
+<nav class="text-gray-500 mb-6" aria-label="Breadcrumb">
+    <ol class="list-reset flex">
+        <li><a href="/admin" class="text-blue-500 hover:underline">Tableau de bord</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li><a href="/admin/users" class="text-blue-500 hover:underline">Liste des Utilisateurs</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li class="text-gray-600">{{user.username}}</li>
+    </ol>
+</nav>
+
+<section id="user-profile" class="mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold">Modifier les informations de {{user.firstName}} {{user.lastName}}
+                ({{user.username}})</h2>
+        </div>
+
+        <!-- Formulaire de modification des informations -->
+        <form id="user-form" class="space-y-4">
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
+            <!-- UUID (readonly) -->
+            <div>
+                <label for="uuid" class="block text-sm font-medium text-gray-700">UUID</label>
+                <input type="text" name="uuid" id="uuid" value="{{user.uuid}}" readonly
+                       class="mt-1 block w-full border-gray-300 bg-gray-100 rounded-md shadow-sm focus:ring-0 focus:border-gray-300">
+            </div>
+
+            <!-- Nom -->
+            <div>
+                <label for="lastName" class="block text-sm font-medium text-gray-700">Nom</label>
+                <input type="text" name="lastName" id="lastName" value="{{user.lastName}}"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Prénom -->
+            <div>
+                <label for="firstName" class="block text-sm font-medium text-gray-700">Prénom</label>
+                <input type="text" name="firstName" id="firstName" value="{{user.firstName}}"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Username -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" name="username" id="username" value="{{user.username}}"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" name="email" id="email" value="{{user.email}}"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Téléphone -->
+            <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700">Téléphone</label>
+                <input type="text" name="phone" id="phone" value="{{user.phone}}"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Grades -->
+            <div>
+                <label for="roles" class="block text-sm font-medium text-gray-700">Grades</label>
+                <select name="roles[]" id="roles" multiple
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    {{#each allRoles}}
+                        <option value="{{this.name}}" {{#if (includes ../user.roles this.name)}}selected{{/if}}>{{this.name}}</option>
+                    {{/each}}
+                </select>
+                <p class="text-sm text-gray-500 mt-1">Maintenez la touche "Ctrl" (Windows) ou "Cmd" (Mac) pour
+                    sélectionner plusieurs grades.</p>
+            </div>
+
+            <!-- Bouton Enregistrer -->
+            <div class="mt-6">
+                <button type="button" onclick="updateUser()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Enregistrer les modifications
+                </button>
+            </div>
+
+            <!-- Bouton Régénérer Mot de Passe -->
+            <div>
+                <button type="button" onclick="regeneratePassword()"
+                        class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                    Régénérer le mot de passe
+                </button>
+            </div>
+
+            <!-- Bouton Activer/Désactiver Compte -->
+            <div>
+                {{#if user.isActive}}
+                    <button type="button" onclick="toggleAccountStatus('{{user.uuid}}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Désactiver le compte</button>
+                {{else}}
+                    <button type="button" onclick="toggleAccountStatus('{{user.uuid}}')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Activer le compte</button>
+                {{/if}}
+            </div>
+
+            <!-- Bouton Supprimer le Compte -->
+            <div class="mt-6">
+                <button type="button" onclick="deleteAccount('{{user.uuid}}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Supprimer le compte</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    const notyf = new Notyf({
+        position: {
+            x: 'right',
+            y: 'top'
+        },
+        duration: 3000
+    });
+
+    // Fonction pour mettre à jour l'utilisateur
+    function updateUser() {
+        const formData = new FormData(document.getElementById('user-form'));
+        const userData = Object.fromEntries(formData);
+
+        fetch(`/api/users/${userData.uuid}/update`, {
+            method: 'POST',
+            headers: {
+                'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        }).then(response => {
+            if (response.ok) {
+                notyf.success("Utilisateur mis à jour avec succès.");
+            } else {
+                notyf.error("Erreur lors de la mise à jour.");
+            }
+        }).catch(() => {
+            notyf.error("Une erreur réseau est survenue.");
+        });
+    }
+
+    // Fonction pour régénérer le mot de passe
+    function regeneratePassword() {
+        fetch(`/api/users/regenerate-password`, {
+            method: 'POST',
+            headers: {
+                'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ uuid: document.getElementById('uuid').value })
+        }).then(response => {
+            if (response.ok) {
+                notyf.success("Le mot de passe a été régénéré avec succès.");
+            } else {
+                notyf.error("Erreur lors de la régénération du mot de passe.");
+            }
+        });
+    }
+
+    // Fonction pour activer/désactiver le compte
+    function toggleAccountStatus(userId) {
+        fetch(`/api/users/${userId}/toggle-status`, {
+            method: 'PUT',
+            headers: {
+                'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                notyf.success("Le statut du compte a été modifié.");
+                location.reload();
+            } else {
+                notyf.error("Erreur lors de la modification du statut.");
+            }
+        }).catch(() => {
+            notyf.error("Une erreur réseau est survenue.");
+        });
+    }
+
+    // Fonction pour supprimer le compte
+    function deleteAccount(userId) {
+        if (confirm("Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.")) {
+            fetch(`/api/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    notyf.success("Compte supprimé avec succès.");
+                    window.location.href = "/admin/users";
+                } else {
+                    notyf.error("Erreur lors de la suppression du compte.");
+                }
+            }).catch(() => {
+                notyf.error("Une erreur réseau est survenue.");
+            });
+        }
+    }
+
+    feather.replace(); // Initialisation des icônes feather
+</script>

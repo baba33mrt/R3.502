@@ -1,4 +1,139 @@
-<div class="center">
-<h1>{{title}}</h1>
-<p>La plateforme mondoalement reconnue pour la bonne gestion des incidents</p>
+<div class="container mx-auto p-4">
+
+    <!-- Titre de la page -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Tableau de Bord</h1>
+    </div>
+
+    <!-- Contenu principal avec layout -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Statistiques à gauche (Section 2) -->
+        <div class="md:col-span-2 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Statistiques</h2>
+            <canvas id="statsChart"></canvas>
+        </div>
+
+        <!-- Boutons à droite (Section 3) -->
+        <div class="space-y-4">
+            <a href="/dashboard/tickets/new" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-center block">Créer un Ticket</a>
+            <a href="/dashboard/tickets/search" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-center block">Rechercher un Ticket</a>
+            <a href="/dashboard/stats" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-center block">Statistiques Avancées</a>
+
+        </div>
+
+        <!-- Tableau des tickets (Section 4) -->
+        <div class="md:col-span-2 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Mes Tickets</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b text-left">ID</th>
+                        <th class="py-2 px-4 border-b text-left">Sujet</th>
+                        <th class="py-2 px-4 border-b text-left">Statut</th>
+                        <th class="py-2 px-4 border-b text-left">Date de Création</th>
+                    </tr>
+                    </thead>
+                    <tbody id="ticketTableBody">
+                    <!-- Les lignes de tickets seront insérées ici dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Liste des membres connectés (Section 5) -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Membres Connectés</h2>
+            <ul id="membersList" class="list-disc pl-5">
+                <!-- Les membres connectés seront insérés ici -->
+            </ul>
+        </div>
+    </div>
 </div>
+
+<script>
+    // Fonction pour charger les statistiques depuis une API et afficher avec Chart.js
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/stats'); // Remplacer par l'URL de votre API
+            //const stats = await response.json();
+            const stats = {
+                labels: ['Ouverts', 'Fermés', 'En Attente'],
+
+                    label: 'Nombre de Tickets ',
+                    data: [12, 19, 5],  // Données d'exemple
+                    backgroundColor: ['#4CAF50', '#FF6384', '#36A2EB'],
+                    borderWidth: 10
+            }
+            const ctx = document.getElementById('statsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar', // Le type de graphique (peut être modifié)
+                data: {
+                    labels: stats.labels, // Par exemple ["Ouverts", "Fermés", "En Attente"]
+                    datasets: [{
+                        label: 'Nombre de Tickets',
+                        data: stats.data, // Par exemple [12, 8, 5]
+                        backgroundColor: ['#4CAF50', '#FF6384', '#36A2EB']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Erreur lors de la récupération des statistiques :", error);
+        }
+    }
+
+    // Charger les tickets depuis une API
+    async function loadTickets() {
+        try {
+            const response = await fetch('/api/tickets/list/me'); // Remplacer par l'URL de votre API
+            const tickets = await response.json();
+            const ticketTableBody = document.getElementById('ticketTableBody');
+            ticketTableBody.innerHTML = ''; // Réinitialiser le tableau
+
+            tickets.forEach(ticket => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td class="py-2 px-4 border-b">${ticket.id}</td>
+                        <td class="py-2 px-4 border-b">${ticket.subject}</td>
+                        <td class="py-2 px-4 border-b">${ticket.status}</td>
+                        <td class="py-2 px-4 border-b">${new Date(ticket.createdAt).toLocaleDateString()}</td>
+                    `;
+                ticketTableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error("Erreur lors de la récupération des tickets :", error);
+        }
+    }
+
+    // Charger la liste des membres connectés depuis une API
+    async function loadMembers() {
+        try {
+            const response = await fetch('/api/members'); // Remplacer par l'URL de votre API
+            const members = await response.json();
+            const membersList = document.getElementById('membersList');
+            membersList.innerHTML = ''; // Réinitialiser la liste
+
+            members.forEach(member => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${member.firstName} ${member.lastName}`;
+                membersList.appendChild(listItem);
+            });
+        } catch (error) {
+            console.error("Erreur lors de la récupération des membres connectés :", error);
+        }
+    }
+
+    // Appeler les fonctions pour charger les données
+    loadStats();
+    loadTickets();
+    loadMembers();
+</script>

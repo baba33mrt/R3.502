@@ -1,133 +1,138 @@
 const express = require("express");
 const router = express.Router();
 let appContext;
-// const url = require("url");
-const fs = require('fs');
-const createError = require("http-errors");
 
 function dynamicRouter(app) {
     //-- Context applicatif
+    // console.debug("Initialisation du contexte de l'application");
     appContext = app;
     // -- Perform Automate action
+    // console.debug("Ajout du middleware manageAction au routeur");
     router.use(manageAction);
     // -- routeur global
+    // console.debug("Ajout du routeur global au contexte de l'application");
     appContext.use(router);
 }
 
-/* Fonction qui permet d'aguiller les requêtes HTTP
-vers le bon contrôleur en fonction de l'action du pathname  */
-function manageAction(req, res, next) {
+/* Fonction qui permet d'aiguiller les requêtes HTTP vers le bon contrôleur en fonction de l'action du pathname */
+async function manageAction(req, res, next) {
+    // console.debug("manageAction - Requête reçue :", req.originalUrl);
     req.message = {};
-    // console.log(req.originalUrl)
 
-    const pathObj = splitQueryParams(req)
-    console.log(pathObj) // --debug--
+    const pathObj = splitQueryParams(req);
+    // console.debug("manageAction - Objet chemin extrait :", pathObj);
+    req.message.action = pathObj.action;
 
-    // On défini la clé de l'annuaire config_actions.json dans une variable "action"
-    req.message.action = pathObj.action
+    /* Chargement de la configuration JSON des paramètres possibles */
+    // console.debug("manageAction - Chargement de config_params.json");
+    // global.params_json = JSON.parse(fs.readFileSync("./config_params.json", "utf8"));
 
-    /*chargement de la configuration JSON des paramètres possibles */
-    global.params_json = JSON.parse(fs.readFileSync("./config_params.json", "utf8"));
-
-    /***************************************************************************************************** */
-    /** AJOUT DE L'ENSEMBLE DES PARAMETRES DU FICHIERS "CONFIG_ACTIONS.JSON" DANS LE MESSAGE ASSOCIE A REQ */
-    /***************************************************************************************************** */
+    /*****************************************************************************************************
+     * AJOUT DE L'ENSEMBLE DES PARAMÈTRES DU FICHIER "CONFIG_ACTIONS.JSON" DANS LE MESSAGE ASSOCIÉ À REQ
+     *****************************************************************************************************/
     /* Boucle de récupération des paramètres de l'action du fichier config_actions.json */
-    const data = searchRoute(pathObj, req)
-    console.log(req.params)
-
-
-    // const data = global.actions_json[req.message.action]
-
-    for (let param in data) {
-        // console.log(data[param], param)
-        req.message[param] = data[param]
+    console.debug("manageAction - Recherche de la route correspondante dans config_actions.json");
+    const data = searchRoute(pathObj, req);
+    if (!data) {
+        console.debug("manageAction - Aucune route trouvée, renvoi de l'erreur 404");
+        return res.status(404).render('404');
     }
 
-    // console.log('req.message dans dynamicRouteur : ', req.message);
+    console.debug("manageAction - Paramètres trouvés :", data);
+    for (let param in data) {
+        req.message[param] = data[param];
+    }
 
     // Récupération des noms de champs pour un upload de fichiers passé dans le config_actions.json
-    if (req.message.fieldUpload) global.fieldUpload = req.message.fieldUpload;
-
-    // (...) Il est donc possible d'ajouter des variables à l'annuaire config_actions.json
-    // en fonction des besoins du développeur, elles seront automatiquemnt récupérées dans
-    // l'objet "req.message" dans les contrôleurs (routes/).
-
-    // Si l'action n'est pas définie dans l'annuaire, on log l'erreur
+    if (req.message.fieldUpload) {
+        // console.debug("manageAction - Définition de fieldUpload global");
+        global.fieldUpload = req.message.fieldUpload;
+    }
 
     let instanceModule;
-    // console.log(typeof global.actions_json[req.message.action])
-    if (typeof global.actions_json[req.message.action] === Object) {
-        console.warn("Erreur: Pas d'action dans l'annuaire config_actions.json : " + pathObj.path);
-        next();
-    } else {
-        try {
-            instanceModule = require('./routes/' + req.message.controller);
+    // console.warn('===========')
+    // console.log(req.message.action, actions_json[req.message.action])
+    // console.warn('===========')
+
+    console.log(req.params)
+
+    try {
+        // Charger le contrôleur seulement si nécessaire
+        // console.debug("manageAction - Chargement du contrôleur :", req.message.controller);
+        instanceModule = require('./routes/' + req.message.controller);
+
+        if (typeof instanceModule === 'function' || instanceModule instanceof express.Router) {
+            // Utiliser le contrôleur comme middleware uniquement s'il est valide
+            // console.debug("manageAction - Utilisation du contrôleur comme middleware");
             router.use(pathObj.path, instanceModule);
-            next();
-        } catch (e) {
-            res.render('404', createError(404));
+            return next();
+        } else {
+            throw new Error('Le module chargé n\'est pas un middleware valide');
         }
+    } catch (e) {
+        console.log("Erreur :", e);
+        res.status(404).render('404');
     }
 }
 
 function splitQueryParams(req) {
-    const splited = req.originalUrl.split("?")
-    return {
+    // console.debug("splitQueryParams - Analyse des paramètres de la requête");
+    const splited = req.originalUrl.split("?");
+    const pathObj = {
         origin: req.originalUrl,
         method: req.method,
         path: splited[0],
         pathArr: splited[0].split("/").filter(Boolean),
-        queryParams: {text: splited[1]},
+        queryParams: { text: splited[1] },
         action: req.method + splited[0]
-    }
+    };
+    // console.debug("splitQueryParams - Objet chemin créé :", pathObj);
+    return pathObj;
 }
 
 function searchRoute(pathObj, req, action = global.actions_json) {
-    // console.log("path", pathObj.action)
-    // console.log("action", action)
-
+    console.debug("searchRoute - Recherche de la route :", pathObj.action);
     // static
     if (action[pathObj.action]) {
-        return action[pathObj.action]
+        console.debug("searchRoute - Route statique trouvée");
+        return action[pathObj.action];
     }
 
     // dyn
     for (let key in action) {
+        // console.debug("searchRoute - Vérification de la route dynamique :", key);
         const keyArr = key.split("/").filter(Boolean);
         const pathArr = pathObj.action.split('/').filter(Boolean);
-        const params = {}
+        const params = {};
         if (keyArr[0] === pathArr[0] && keyArr.length === pathArr.length) {
-            let shouldContinue = false;  // Variable de contrôle pour déterminer si on doit continuer à la prochaine clé
+            let shouldContinue = false;
 
             for (let index = 1; index < pathArr.length; index++) {
                 const regex = /^:[a-zA-Z]/;
 
-                // Si la partie ne correspond pas et que ce n'est pas une partie dynamique (regex), on passe à la prochaine clé
                 if (pathArr[index] !== keyArr[index] && !regex.test(keyArr[index])) {
                     shouldContinue = true;
                     break;
                 }
-                if(regex.test(keyArr[index])){
-                    // console.log(pathArr[index]) // vdebug
+                if (regex.test(keyArr[index])) {
                     const paramName = keyArr[index].substring(1);
-                    //console.log(paramName) // debug
-                    params[paramName] = pathArr[index];}
+                    params[paramName] = pathArr[index];
+                }
             }
 
             if (shouldContinue) {
                 continue;
             }
 
-            // Sinon, c'est une correspondance valide, on peut exécuter le code correspondant
-            req.params = params;
-            // console.log(params);  // debug
+            req.params = { ...req.params, ...params };
+            console.debug("searchRoute - Route dynamique trouvée avec paramètres :", req.params);
             return action[key];
         }
     }
 
     // none
-    return null
+    console.debug("searchRoute - Aucune route trouvée");
+    return null;
 }
 
 module.exports = dynamicRouter;

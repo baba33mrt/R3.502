@@ -15,13 +15,14 @@
     "view": "login",
     "title": "Bienvenue dans le framework Node/Express"
   },
+
+
   "GET/api/users": {
     "controller": "nosql/api/findReturnSpecific",
     "modelName": "Users",
     "return_type": "application/json",
     "return_data": [
       "uuid",
-      "roles",
       "username",
       "fitstName",
       "lastName",
@@ -29,15 +30,87 @@
       "phone"
     ]
   },
-  "GET/dashboard/tickets/": {
+  "POST/api/users/:uuid/update": {
+    "controller": "nosql/api/userController",
+    "return_type": "application/json"
+  },
+  "POST/api/users/ne": {
+    "controller": "nosql/api/userController",
+    "return_type": "application/json"
+  },
+  "GET/api/users/:id": {
+    "controller": "nosql/api/userController",
+    "return_type": "application/json"
+  },
+
+
+
+  "GET/api/tickets/list": {
     "controller": "nosql/api/ticketsController",
-    "action": "listTickets",
+    "return_type": "application/json",
+    "title": "Liste des Tickets",
+    "return_data": [
+      "_id",
+      "state",
+      "priority",
+      "subject"
+    ]},
+  "POST/api/tickets/comment/add": {
+    "controller": "nosql/api/ticketsComment",
+    "return_type": "application/json"
+  },
+  "POST/api/tickets/new": {
+    "controller": "nosql/api/ticketsController",
+    "return_type": "application/json"
+  },
+  "PUT/api/tickets/edit": {
+    "controller": "nosql/api/ticketsController",
+    "return_type": "application/json"
+  },
+
+  "POST/api/projects": {
+    "controller": "nosql/api/projectsController",
+    "return_type": "application/json"
+  },
+  "PUT/api/projects/update": {
+    "controller": "nosql/api/projectsController",
+    "return_type": "application/json"
+  },
+  "DELETE/api/projects/delete": {
+    "controller": "nosql/api/projectsController",
+    "return_type": "application/json"
+  },
+  "GET/api/projects": {
+    "controller": "nosql/api/projectsController",
+    "return_type": "application/json"
+  },
+
+  "POST/api/clients": {
+    "controller": "nosql/api/clientsController",
+    "return_type": "application/json"
+  },
+  "PUT/api/clients/update": {
+    "controller": "nosql/api/clientsController",
+    "return_type": "application/json"
+  },
+  "DELETE/api/clients/delete": {
+    "controller": "nosql/api/clientsController",
+    "return_type": "application/json"
+  },
+  "GET/api/clients": {
+    "controller": "nosql/api/clientsController",
+    "return_type": "application/json"
+  },
+
+
+
+  "GET/dashboard/tickets": {
+    "controller": "nosql/ticketsController",
     "view": "ticketList",
     "title": "Liste des Tickets"
   },
   "GET/dashboard/tickets/:id": {
-    "controller": "nosql/api/ticketsController",
-    "action": "getTicketById",
+    "controller": "nosql/ticketsController",
     "view": "ticketDetail",
     "title": "Détails du Ticket"
   },
@@ -46,35 +119,111 @@
     "view": "newTicket",
     "title": "Création d'un nouveau ticket"
   },
-  "GET/admin/users/new": {
-    "controller": "nosql/findMultipleCollections",
-    "collections": [
-      "Groups"
-    ],
-    "view": "admin-newUser",
-    "title": "Création d'un nouvel utilisateur"
-  },
-  "POST/api/users/new": {
-    "controller": "nosql/api/userManager",
-    "redirect": "/admin/users?status=success",
-    "modelName": "Users"
-  },
-  "DELETE/api/users/delete": {
-    "controller": "nosql/api/userManager",
-    "action": "createTicket"
-  },
-  "POST/api/tickets/new": {
-    "controller": "nosql/api/ticketsController",
-    "action": "createTicket"
-  },
-  "GET/dashboard/hotliner": {
+
+
+  "GET/admin": {
     "controller": "getView",
-    "view": "DashHotliner",
+    "view": "admin/home",
     "title": "Dashboard Hotliner"
   },
-  "GET/dashboard/modifTicket": {
+
+  "GET/admin/users": {
+    "controller": "nosql/admin/usersController",
+    "view": "admin/users",
+    "title": "Dashboard Hotliner"
+  },
+  "GET/admin/users/new": {
     "controller": "getView",
-    "view": "modifTicket",
-    "title": "Modification du ticket"
+    "view": "admin/userAdd",
+    "title": "Dashboard Hotliner"
+  },
+  "GET/admin/users/:uuid": {
+    "controller": "nosql/admin/usersController",
+    "view": "admin/home",
+    "title": "Dashboard Hotliner"
+  },
+  "POST/admin/users/:uuid:/update": {
+    "controller": "nosql/admin/usersController",
+    "view": "admin/users",
+    "title": "Dashboard Hotliner"
+  },
+  "POST/admin/users/new": {
+    "controller": "nosql/admin/usersController",
+    "view": "admin/users",
+    "title": "Dashboard Hotliner"
+  },
+
+  "GET/admin/projects": {
+    "controller": "nosql/admin/projectsController",
+    "view": "admin/projects",
+    "title": "Dashboard Hotliner"
+  },
+  "GET/admin/projects/new": {
+    "controller": "getView",
+    "view": "admin/projectsAdd",
+    "title": "Dashboard Hotliner"
+  },
+  "GET/admin/projects/:uuid": {
+    "controller": "nosql/admin/projectsController",
+    "title": "Dashboard Hotliner"
+  },
+  "POST/admin/project/:uuid/update": {
+    "controller": "nosql/admin/projectsController",
+    "view": "admin/users",
+    "title": "Dashboard Hotliner"
+  },
+  "POST/admin/projects/new": {
+    "controller": "nosql/admin/projectsController",
+    "view": "admin/users",
+    "title": "Dashboard Hotliner"
+  },
+
+  "GET/admin/clients": {
+    "controller": "nosql/admin/clientsController",
+    "view": "admin/clients",
+    "title": "Dashboard Hotliner"
+  },
+  "GET/admin/clients/:uuid": {
+    "controller": "nosql/admin/clientsController",
+    "view": "admin/clientsEdit",
+    "title": "Dashboard Hotliner"
+  },
+
+  "GET/admin/api": {
+    "controller": "getView",
+    "view": "admin/home",
+    "title": "Dashboard Hotliner"
+  },
+
+  "GET/admin/permissions": {
+    "controller": "getView",
+    "view": "admin/home",
+    "title": "Dashboard Hotliner"
+  },
+  "GET/admin/permissions/new": {
+    "controller": "getView",
+    "view": "admin/home",
+    "title": "Dashboard Hotliner"
+  },
+  "GET/admin/permissions/edit": {
+    "controller": "getView",
+    "view": "admin/home",
+    "title": "Dashboard Hotliner"
+  },
+
+  "GET/admin/groups": {
+    "controller": "getView",
+    "view": "admin/home",
+    "title": "Dashboard Hotliner"
+  },
+  "GET/admin/groups/new": {
+    "controller": "getView",
+    "view": "admin/home",
+    "title": "Dashboard Hotliner"
+  },
+  "GET/admin/groups/edit": {
+    "controller": "getView",
+    "view": "admin/home",
+    "title": "Dashboard Hotliner"
   }
 }

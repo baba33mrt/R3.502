@@ -1,0 +1,120 @@
+<!-- File d'Ariane -->
+<nav class="text-gray-500 mb-6" aria-label="Breadcrumb">
+    <ol class="list-reset flex">
+        <li><a href="/admin" class="text-blue-500 hover:underline">Tableau de bord</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li class="text-gray-600">Liste des clients</li>
+    </ol>
+</nav>
+
+<!-- Section Liste des Projets -->
+<section id="user-list" class="mb-8">
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Liste des clients</h2>
+            <!-- Bouton Ajouter un projet -->
+            <button id="add" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Ajouter un client</button>
+        </div>
+
+        <table class="min-w-full bg-white">
+            <thead>
+            <tr>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Entreprise</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">email</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">téléphone</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">créé le</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#each clients}}
+                <tr>
+                    <td class="py-2 px-4 border-b">{{this.entrepriseName}}</td>
+                    <td class="py-2 px-4 border-b">{{this.email}}</td>
+                    <td class="py-2 px-4 border-b">{{this.technicalPhone}}</td>
+                    <td class="py-2 px-4 border-b">{{this.uuid}}</td>
+                    <td class="py-2 px-4 border-b">{{formatDateTime this.createdAt}}</td>
+                    <td class="py-2 px-4 border-b">
+                        <a href="/admin/clients/{{this.uuid}}" class="inline-flex items-center text-blue-500 hover:underline">
+                            <i data-feather="edit" class="w-4 h-4 mr-1"></i>Éditer
+                        </a>
+                    </td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    feather.replace(); // Initialisation des icônes feather
+    const addButton = document.getElementById("add");
+
+    if (addButton) {
+        addButton.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Créer un projet',
+                html: `
+                    <div>
+                        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                        <label for="client-name" class="block text-left">Nom du projet :</label>
+                        <input type="text" id="client-name" class="w-full p-2 border rounded-lg" placeholder="Nom du projet">
+                        <label for="project-description" class="block text-left mt-4">Description :</label>
+                        <textarea id="project-description" class="w-full p-2 border rounded-lg" rows="4" placeholder="Description du projet"></textarea>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Créer',
+                cancelButtonText: 'Annuler',
+                preConfirm: () => {
+                    const name = document.getElementById('client-name').value;
+                    const description = document.getElementById('project-description').value;
+
+                    if (!name || !description) {
+                        Swal.showValidationMessage('Veuillez remplir tous les champs.');
+                    }
+
+                    return { name, description };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { name, description } = result.value;
+
+                    fetch('/api/projects/new', {
+                        method: 'POST',
+                        headers: {
+                            'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name, description })
+                    }).then(response => response.json()).then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Projet créé',
+                                text: 'Le projet a été créé avec succès.',
+                                icon: 'success',
+                                confirmButtonText: 'Fermer'
+                            }).then(() => window.location.reload());
+                        } else {
+                            Swal.fire({
+                                title: 'Erreur',
+                                text: data.message || 'Une erreur est survenue lors de la création du projet.',
+                                icon: 'error',
+                                confirmButtonText: 'Fermer'
+                            });
+                        }
+                    }).catch(() => {
+                        Swal.fire({
+                            title: 'Erreur',
+                            text: 'Une erreur réseau est survenue.',
+                            icon: 'error',
+                            confirmButtonText: 'Fermer'
+                        });
+                    });
+                }
+            });
+        });
+    }
+</script>

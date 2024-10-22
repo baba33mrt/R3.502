@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+{{> head}}
+
+<body class="bg-gray-100">
+
+<!-- Barre de navigation principale -->
+<nav class="bg-gray-800 p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <a href="/admin" class="text-white text-2xl font-bold">Admin Dashboard</a>
+        <div class="flex space-x-4">
+            <a href="/dashboard" class="text-gray-300 hover:text-white">Dashboard</a>
+            <a href="/logout" class="text-red-500 hover:text-red-700">Se déconnecter</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Seconde barre de navigation -->
+<nav class="bg-gray-700 p-3">
+    <div class="container mx-auto flex space-x-4">
+        <a href="/admin/stats" class="text-gray-200 hover:text-white">Statistiques</a>
+        <a href="/admin/users" class="text-gray-200 hover:text-white">Gestion des Utilisateurs</a>
+        <a href="/admin/api" class="text-gray-200 hover:text-white">Gestion des jetons API</a>
+        <a href="/admin/projects" class="text-gray-200 hover:text-white">Gestion des projets</a>
+        <a href="/admin/clients" class="text-gray-200 hover:text-white">Gestion des clients</a>
+
+        <a href="#logs" class="text-gray-200 hover:text-white">Journaux</a>
+    </div>
+</nav>
+
+<!-- Contenu principal -->
+<main class="container mx-auto p-6">
+    {{{body}}}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce/tinymce.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+</body>
+</html>

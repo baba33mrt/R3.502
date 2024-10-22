@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100">
+
+<!-- Barre de navigation principale -->
+<nav class="bg-gray-800 p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <a href="/admin" class="text-white text-2xl font-bold">Admin Dashboard</a>
+        <div class="flex space-x-4">
+            <a href="/admin/users" class="text-gray-300 hover:text-white">Utilisateurs</a>
+            <a href="/admin/tickets" class="text-gray-300 hover:text-white">Tickets</a>
+            <a href="/admin/settings" class="text-gray-300 hover:text-white">Paramètres</a>
+            <a href="/logout" class="text-red-500 hover:text-red-700">Se déconnecter</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Seconde barre de navigation -->
+<nav class="bg-gray-700 p-3">
+    <div class="container mx-auto flex space-x-4">
+        <a href="#stats" class="text-gray-200 hover:text-white">Statistiques</a>
+        <a href="#recent-tickets" class="text-gray-200 hover:text-white">Tickets Récents</a>
+        <a href="#user-management" class="text-gray-200 hover:text-white">Gestion des Utilisateurs</a>
+        <a href="#logs" class="text-gray-200 hover:text-white">Journaux</a>
+    </div>
+</nav>
+
+<!-- Contenu principal -->
+<main class="container mx-auto p-6">
+    {{{body}}}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce/tinymce.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+</body>
+</html>

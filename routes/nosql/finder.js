@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
+/* GET users.hbs listing. */
 router.get('/', function (req, res, next) {
     if ((req.session.passport) && (req.session.passport.user != null)) {
         global.schemas[req.message.modelName].find({}, function (err, result) {
@@ -9,7 +9,7 @@ router.get('/', function (req, res, next) {
                 throw err;
             }
             console.log("connexion depuis Finder : ", result);
-            if (req.message.return_type == null) {
+            if (req.message.return_type === null) {
                 res.render(req.message.view, {
                     stitle: 'First Cnx Mongo',
                     title: req.message.title,

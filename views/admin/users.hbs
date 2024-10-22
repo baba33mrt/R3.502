@@ -1,0 +1,69 @@
+<!-- File d'Ariane -->
+<nav class="text-gray-500 mb-6" aria-label="Breadcrumb">
+    <ol class="list-reset flex">
+        <li><a href="/admin" class="text-blue-500 hover:underline">Tableau de bord</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li class="text-gray-600">Liste des Utilisateurs</li>
+    </ol>
+</nav>
+
+<!-- Section Liste des Utilisateurs -->
+<section id="user-list" class="mb-8">
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Liste des Utilisateurs</h2>
+            <!-- Bouton Ajouter un utilisateur -->
+            <a href="/admin/users/new" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Ajouter un utilisateur
+            </a>
+        </div>
+
+
+        <table class="min-w-full bg-white">
+            <thead>
+            <tr>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600"></th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Nom</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Prénom</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Nom d'utilisateur</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Compte créé le</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Grades</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#each users}}
+                <tr>
+                <td class="py-2 px-4 border-b">
+                    {{#if this.isActive}}
+                        <span class="py-2 px-4 border-binline-block bg-green-500 px-2 py-1 rounded-full mr-1"></span>
+                    {{else}}
+                        <span class="inline-block bg-red-500 px-2 py-1 rounded-full mr-1"></span>
+                    {{/if}}
+                    </td>
+                    <td class="py-2 px-4 border-b">{{this.lastName}}</td>
+                    <td class="py-2 px-4 border-b">{{this.firstName}}</td>
+                    <td class="py-2 px-4 border-b">{{this.username}}</td>
+                    <td class="py-2 px-4 border-b">{{formatDateTime this.createdAt}}</td>
+                    <td class="py-2 px-4 border-b">
+                        {{#each this.roles}}
+                            <span class="inline-block bg-red-200 text-red-800 text-xs font-semibold px-2 py-1 rounded-full mr-1">
+                                {{this}}
+                            </span>
+                        {{/each}}
+                    </td>
+                    <td class="py-2 px-4 border-b">
+                        <a href="/admin/users/{{this.uuid}}" class="inline-flex items-center text-blue-500 hover:underline">
+                            <i data-feather="edit" class="w-4 h-4 mr-1"></i>Éditer
+                        </a>
+                    </td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    feather.replace(); // Initialisation des icônes feather
+</script>

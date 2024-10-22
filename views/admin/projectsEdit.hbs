@@ -1,0 +1,150 @@
+<!-- File d'Ariane -->
+<nav class="text-gray-500 mb-6" aria-label="Breadcrumb">
+    <ol class="list-reset flex">
+        <li><a href="/admin" class="text-blue-500 hover:underline">Tableau de bord</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li><a href="/admin/projects" class="text-blue-500 hover:underline">Liste des Projets</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li class="text-gray-600">{{project.name}}</li>
+    </ol>
+</nav>
+
+<section id="user-profile" class="mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold">Modifier les informations du projet "{{project.name}}"</h2>
+        </div>
+
+        <!-- Formulaire de modification des informations -->
+        <form id="project-form" class="space-y-4">
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
+            <!-- UUID (readonly) -->
+            <div>
+                <label for="uuid" class="block text-sm font-medium text-gray-700">UUID</label>
+                <input type="text" name="uuid" id="uuid" value="{{project.uuid}}" readonly
+                       class="mt-1 block w-full border-gray-300 bg-gray-100 rounded-md shadow-sm focus:ring-0 focus:border-gray-300">
+            </div>
+
+            <!-- Nom du projet -->
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Nom du projet</label>
+                <input type="text" name="name" id="name" value="{{project.name}}"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Description du projet -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea name="description" id="description" rows="4"
+                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">{{project.description}}</textarea>
+            </div>
+
+            <!-- Bouton Enregistrer -->
+            <div class="mt-6">
+                <button type="button" onclick="updateProject()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Enregistrer les modifications
+                </button>
+            </div>
+
+            <!-- Bouton Supprimer -->
+            <div class="mt-6">
+                <button type="button" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" id="deleteProject">
+                    Supprimer le projet
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    feather.replace(); // Initialisation des icônes feather
+
+    // Fonction pour mettre à jour le projet via API
+    function updateProject() {
+        const formData = new FormData(document.getElementById('project-form'));
+        const projectData = Object.fromEntries(formData);
+
+        fetch(`/api/projects/update`, {
+            method: 'PUT',
+            headers: {
+                'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(projectData)
+        }).then(response => {
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Succès',
+                    text: 'Le projet a été mis à jour avec succès.',
+                    icon: 'success',
+                    confirmButtonText: 'Fermer'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors de la mise à jour.',
+                    icon: 'error',
+                    confirmButtonText: 'Fermer'
+                });
+            }
+        }).catch(() => {
+            Swal.fire({
+                title: 'Erreur',
+                text: 'Une erreur réseau est survenue.',
+                icon: 'error',
+                confirmButtonText: 'Fermer'
+            });
+        });
+    }
+
+    // Script pour supprimer le projet avec confirmation
+    document.getElementById('deleteProject').addEventListener('click', function () {
+        Swal.fire({
+            title: 'Êtes-vous sûr ?',
+            text: "Cette action est irréversible.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/projects/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ uuid: "{{project.uuid}}" })
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Supprimé !',
+                            text: 'Le projet a été supprimé avec succès.',
+                            icon: 'success',
+                            confirmButtonText: 'Fermer'
+                        }).then(() => window.location.href = "/admin/projects");
+                    } else {
+                        Swal.fire({
+                            title: 'Erreur',
+                            text: data.message || 'Une erreur est survenue lors de la suppression.',
+                            icon: 'error',
+                            confirmButtonText: 'Fermer'
+                        });
+                    }
+                }).catch(() => {
+                    Swal.fire({
+                        title: 'Erreur',
+                        text: 'Une erreur réseau est survenue.',
+                        icon: 'error',
+                        confirmButtonText: 'Fermer'
+                    });
+                });
+            }
+        });
+    });
+</script>

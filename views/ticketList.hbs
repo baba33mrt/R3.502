@@ -1,14 +1,40 @@
-<!-- Je ne comprends rien a ce que vous avez voulu faire ici - Mohamad-->
-<div class="ticket-list-container">
-    <h1 class="ticket-list-title">{{title}}</h1>
-    <ul class="ticket-list">
-        {{#each tickets}}
-            <li class="ticket-item {{this.etat}}">
-                <a href="/dashboard/tickets/{{this._id}}" class="ticket-link">
-                    <span class="ticket-subject">{{this.sujet}}</span> 
-                    <span class="ticket-status">{{this.etat}}</span>
-                </a>
-            </li>
-        {{/each}}
-    </ul>
+<div class="container mx-auto py-8">
+
+
+    <h1 class="text-3xl font-bold mb-4">Liste des Tickets</h1>
+    <table id="ticketTable" class="display">
+        <thead>
+        <tr>
+            <th>Sujet</th>
+            <th>Priority</th>
+            <th>État</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Les données seront chargées ici dynamiquement par DataTables -->
+        </tbody>
+    </table>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $('#ticketTable').DataTable({
+            "ajax": {
+                "url": "/api/tickets/list",  // L'URL de ton API
+                "dataSrc": ""  // L'API renvoie un tableau d'objets, donc pas besoin de dataSrc spécifique
+            },
+            "columns": [
+                {"data": "subject"},  // Colonne sujet
+                {"data": "priority"},
+                {"data": "state"},   // Colonne état
+                {
+                    "data": "_id",      // Colonne action avec bouton de lien
+                    "render": function (data, type, row) {
+                        return `<a href="/dashboard/tickets/${data}" class="text-blue-600 hover:underline">Voir le ticket</a>`;
+                    }
+                }
+            ]
+        });
+    });
+</script>

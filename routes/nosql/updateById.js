@@ -22,7 +22,7 @@ router.route('/:_id').get(function(req, res) {
                     if (err) {
                         throw err;
                     }
-                    console.log('users: ', result);
+                    console.log('users.hbs: ', result);
                     res.render(view, {
                         title: req.message.title,
                         data: result[0]
@@ -54,7 +54,7 @@ router.route('/:_id').post(function(req, res) {
                     if (err) {
                         throw err;
                     }
-                    console.log('users: ', result);
+                    console.log('users.hbs: ', result);
                     res.render(req.message.view, {
                         title: req.message.title,
                         data: result[0]
