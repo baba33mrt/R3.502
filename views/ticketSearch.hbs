@@ -1,0 +1,183 @@
+<section id="search-tickets" class="mb-8">
+    <div class="bg-white rounded-lg shadow p-6 space-y-4">
+        <h2 class="text-2xl font-bold">Rechercher des Tickets</h2>
+
+        <!-- Formulaire de recherche de tickets -->
+        <form id="ticket-search-form" class="space-y-4">
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
+            <!-- UUID du ticket -->
+            <div>
+                <label for="uuid" class="block text-sm font-medium text-gray-700">UUID du Ticket</label>
+                <input type="text" name="uuid" id="uuid" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Créé par -->
+            <div>
+                <label for="author" class="block text-sm font-medium text-gray-700">Créé par (Nom ou Email)</label>
+                <input type="text" name="author" id="author" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- État du ticket -->
+            <div>
+                <label for="state" class="block text-sm font-medium text-gray-700">État du Ticket</label>
+                <select name="state" id="state" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Tous</option>
+                    <option value="open">Ouvert</option>
+                    <option value="in-progress">En cours</option>
+                    <option value="done">Terminé</option>
+                    <option value="canceled">Annulé</option>
+                </select>
+            </div>
+
+            <!-- Créé avant/après/entre -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="createdBefore" class="block text-sm font-medium text-gray-700">Créé avant le</label>
+                    <input type="date" name="createdBefore" id="createdBefore" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="createdAfter" class="block text-sm font-medium text-gray-700">Créé après le</label>
+                    <input type="date" name="createdAfter" id="createdAfter" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Clôturé avant/après/entre -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="closedBefore" class="block text-sm font-medium text-gray-700">Clôturé avant le</label>
+                    <input type="date" name="closedBefore" id="closedBefore" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="closedAfter" class="block text-sm font-medium text-gray-700">Clôturé après le</label>
+                    <input type="date" name="closedAfter" id="closedAfter" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Origine -->
+            <div>
+                <label for="origin" class="block text-sm font-medium text-gray-700">Origine</label>
+                <input type="text" name="origin" id="origin" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Projet associé -->
+            <div>
+                <label for="project" class="block text-sm font-medium text-gray-700">Projet</label>
+                <select name="project" id="project" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Tous les projets</option>
+                    {{#each projects}}
+                        <option value="{{this.uuid}}">{{this.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <!-- Sujet du ticket -->
+            <div>
+                <label for="subject" class="block text-sm font-medium text-gray-700">Sujet du Ticket</label>
+                <input type="text" name="subject" id="subject" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Priorité -->
+            <div>
+                <label for="priority" class="block text-sm font-medium text-gray-700">Priorité</label>
+                <select name="priority" id="priority" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Toutes</option>
+                    <option value="0">Faible</option>
+                    <option value="1">Moyen</option>
+                    <option value="2">Haut</option>
+                    <option value="3">Urgent</option>
+                    <option value="4">Critique</option>
+                </select>
+            </div>
+
+            <!-- Bouton Rechercher -->
+            <div class="mt-6">
+                <button type="button" id="searchTicketButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Rechercher
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tableau des résultats -->
+    <div id="results-section" class="bg-white rounded-lg shadow p-6 mt-6 hidden">
+        <h2 class="text-2xl font-bold mb-4">Résultats de la recherche</h2>
+        <table class="min-w-full bg-white">
+            <thead>
+            <tr>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">UUID</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Sujet</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">État</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Projet</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Priorité</th>
+                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Créé le</th>
+
+            </tr>
+            </thead>
+            <tbody id="results-body">
+            <!-- Les résultats de la recherche seront insérés ici dynamiquement -->
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.getElementById('searchTicketButton').addEventListener('click', function () {
+        const formData = new FormData(document.getElementById('ticket-search-form'));
+        const searchParams = Object.fromEntries(formData);
+
+        // Requête API pour rechercher les tickets
+        fetch('/api/tickets/search', {
+            method: 'POST',
+            headers: {
+                'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(searchParams)
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                const resultsSection = document.getElementById('results-section');
+                const resultsBody = document.getElementById('results-body');
+
+                // Affichage des résultats
+                if (data.tickets.length > 0) {
+                    resultsBody.innerHTML = data.tickets.map(ticket => `
+                        <tr>
+                            <td class="py-2 px-4 border-b"><a href="/dashboard/tickets/${ticket._id}">${ticket.uuid}</a></td>
+                            <td class="py-2 px-4 border-b">${ticket.subject}</td>
+                            <td class="py-2 px-4 border-b">${ticket.state}</td>
+                            <td class="py-2 px-4 border-b">${ticket.project.name}</td>
+                            <td class="py-2 px-4 border-b">${ticket.priority}</td>
+                            <td class="py-2 px-4 border-b">${new Date(ticket.createAt).toLocaleDateString()}</td>
+                        </tr>
+                    `).join('');
+                    resultsSection.classList.remove('hidden');
+                } else {
+                    Swal.fire({
+                        title: 'Aucun résultat',
+                        text: 'Aucun ticket trouvé pour ces critères.',
+                        icon: 'info',
+                        confirmButtonText: 'Fermer'
+                    });
+                    resultsSection.classList.add('hidden');
+                }
+            } else {
+                Swal.fire({
+                    title: 'Erreur',
+                    text: data.message || 'Une erreur est survenue lors de la recherche des tickets.',
+                    icon: 'error',
+                    confirmButtonText: 'Fermer'
+                });
+            }
+        }).catch(() => {
+            Swal.fire({
+                title: 'Erreur',
+                text: 'Une erreur réseau est survenue.',
+                icon: 'error',
+                confirmButtonText: 'Fermer'
+            });
+        });
+    });
+</script>

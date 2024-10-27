@@ -35,7 +35,7 @@ async function manageAction(req, res, next) {
     const data = searchRoute(pathObj, req);
     if (!data) {
         console.debug("manageAction - Aucune route trouvée, renvoi de l'erreur 404");
-        return res.status(404).render('404');
+        return next();
     }
 
     console.debug("manageAction - Paramètres trouvés :", data);
@@ -71,7 +71,7 @@ async function manageAction(req, res, next) {
         }
     } catch (e) {
         console.log("Erreur :", e);
-        res.status(404).render('404');
+        return next();
     }
 }
 

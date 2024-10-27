@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const {v4: uuidv4} = require("uuid");
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 // Schéma pour les commentaires
@@ -35,6 +36,7 @@ const ticketSchema = new mongoose.Schema({
     history: [historySchema],
     open: { type: Boolean, default: true },
     affected: { type: mongoose.Schema.Types.ObjectId, ref: 'Users'},
+    uuid: { type: String, default: uuidv4 }
 
 });
 

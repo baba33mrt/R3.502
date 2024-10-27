@@ -67,6 +67,10 @@
     "controller": "nosql/api/ticketsController",
     "return_type": "application/json"
   },
+  "POST/api/tickets/search": {
+    "controller": "nosql/api/ticketsSearch",
+    "return_type": "application/json"
+  },
 
   "POST/api/projects": {
     "controller": "nosql/api/projectsController",
@@ -109,15 +113,20 @@
     "view": "ticketList",
     "title": "Liste des Tickets"
   },
+  "GET/dashboard/new": {
+    "controller": "getView",
+    "view": "newTicket",
+    "title": "Création d'un nouveau ticket"
+  },
+  "GET/dashboard/search": {
+    "controller": "getView",
+    "view": "ticketSearch",
+    "title": "Création d'un nouveau ticket"
+  },
   "GET/dashboard/tickets/:id": {
     "controller": "nosql/ticketsController",
     "view": "ticketDetail",
     "title": "Détails du Ticket"
-  },
-  "GET/dashboard/tickets/new": {
-    "controller": "getView",
-    "view": "newTicket",
-    "title": "Création d'un nouveau ticket"
   },
 
 

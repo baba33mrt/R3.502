@@ -1,34 +1,148 @@
-<div class="ticket-form">
-  <h2>Nouveau ticket</h2>
-  <form action="/api/tickets/new" method="POST">
-    <div class="form-group">
-      <label for="sujet">Sujet :</label>
-      <input type="text" id="sujet" name="sujet" required>
+<section id="create-ticket" class="mb-8">
+    <div class="bg-white rounded-lg shadow p-6 space-y-4">
+        <h2 class="text-2xl font-bold">Créer un Nouveau Ticket</h2>
+
+        <!-- Formulaire de création de ticket -->
+        <form id="ticket-form" class="space-y-4">
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
+            <!-- Sujet -->
+            <div>
+                <label for="subject" class="block text-sm font-medium text-gray-700">Sujet du Ticket</label>
+                <input type="text" name="subject" id="subject" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <!-- Description (TinyMCE) -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea name="description" id="description" rows="6" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+            </div>
+
+            <!-- Client associé -->
+            <div>
+                <label for="client" class="block text-sm font-medium text-gray-700">Client associé</label>
+                <select name="client" id="client" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Sélectionnez un client</option>
+                    {{#each clients}}
+                        <option value="{{this.uuid}}">{{this.entrepriseName}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <!-- Projet associé (chargé dynamiquement) -->
+            <div>
+                <label for="project" class="block text-sm font-medium text-gray-700">Projet associé</label>
+                <select name="project" id="project" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" disabled>
+                    <option value="">Sélectionnez un projet</option>
+                </select>
+            </div>
+
+            <!-- Bouton Créer le Ticket -->
+            <div class="mt-6">
+                <button type="button" id="createTicketButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Créer le Ticket
+                </button>
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-      <label for="client">Nom du client :</label>
-      <input type="text" id="client" name="client" required>
-    </div>
-    <div class="form-group">
-      <label for="level">Niveau :</label>
-      <select id="level" name="level" required>
-        <option value="bas">Bas</option>
-        <option value="moyen">Moyen</option>
-        <option value="haut">Haut</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="origine">Origine :</label>
-      <input type="text" id="origine" name="origine" required>
-    </div>
-    <div class="form-group">
-      <label for="typeDemande">Type de demande :</label>
-      <input type="text" id="typeDemande" name="typeDemande" required>
-    </div>
-    <div class="form-group">
-      <label for="message">Message :</label>
-      <textarea id="message" name="message" rows="6" required></textarea>
-    </div>
-    <button type="submit" class="submit-btn">Envoyer</button>
-  </form>
-</div>
+</section>
+
+<script src="https://cdn.tiny.cloud/1/m2a1xz7oxnd5sbh8780k58ju6cugk5j2e2kyaea9r6uz1iu7/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Initialisation de TinyMCE pour le champ de description
+    tinymce.init({
+        selector: '#description',
+        plugins: 'code anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+        toolbar: 'undo redo code | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+        menubar: false
+    });
+
+    // Fonction pour charger les projets en fonction du client sélectionné
+    document.getElementById('client').addEventListener('change', function () {
+        const clientId = this.value;
+        const projectSelect = document.getElementById('project');
+
+        if (!clientId) {
+            projectSelect.innerHTML = '<option value="">Sélectionnez un projet</option>';
+            projectSelect.disabled = true;
+            return;
+        }
+
+        // Récupérer les projets pour le client sélectionné
+        fetch(`/api/projects/by-client/${clientId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        projectSelect.innerHTML = data.projects.map(project => `<option value="${project.uuid}">${project.name}</option>`).join('');
+                        projectSelect.disabled = false;
+                    } else {
+                        projectSelect.innerHTML = '<option value="">Aucun projet trouvé</option>';
+                        projectSelect.disabled = true;
+                    }
+                })
+                .catch(() => {
+                    Swal.fire({
+                        title: 'Erreur',
+                        text: 'Une erreur est survenue lors de la récupération des projets.',
+                        icon: 'error',
+                        confirmButtonText: 'Fermer'
+                    });
+                    projectSelect.disabled = true;
+                });
+    });
+
+    // Fonction pour créer un ticket
+    document.getElementById('createTicketButton').addEventListener('click', function () {
+        const formData = new FormData(document.getElementById('ticket-form'));
+        const ticketData = Object.fromEntries(formData);
+
+        // Récupérer le contenu TinyMCE pour la description
+        ticketData.description = tinymce.get('description').getContent();
+
+        if (!ticketData.subject || !ticketData.description || !ticketData.project || !ticketData.client) {
+            Swal.fire({
+                title: 'Erreur',
+                text: 'Veuillez remplir tous les champs.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        fetch('/api/tickets/new', {
+            method: 'POST',
+            headers: {
+                'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ticketData)
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Ticket créé',
+                    text: 'Le ticket a été créé avec succès.',
+                    icon: 'success',
+                    confirmButtonText: 'Fermer'
+                }).then(() => {
+                    window.location.href = '/admin/tickets';
+                });
+            } else {
+                Swal.fire({
+                    title: 'Erreur',
+                    text: data.message || 'Une erreur est survenue lors de la création du ticket.',
+                    icon: 'error',
+                    confirmButtonText: 'Fermer'
+                });
+            }
+        }).catch(() => {
+            Swal.fire({
+                title: 'Erreur',
+                text: 'Une erreur réseau est survenue.',
+                icon: 'error',
+                confirmButtonText: 'Fermer'
+            });
+        });
+    });
+</script>
