@@ -1,80 +1,106 @@
 const express = require('express');
 const router = express.Router();
-const Users = schemas.Users; // Assurer que tu utilises la bonne définition du modèle pour les utilisateurs
-const Groups = schemas.Groups;
+const {hashPassword} = require("../../../utils/CryptoManager")
 
-// Middleware pour parser les requêtes URL encodées
-router.use(express.urlencoded({ extended: true }));
-router.use(express.json()); // Important pour traiter les requêtes JSON
+router.use(express.json());
 
-// Route pour mettre à jour un utilisateur via API
-router.post("/:uuid/update", async (req, res) => {
+// Route pour récupérer un utilisateur par UUID
+router.get('/:uuid', async (req, res) => {
     try {
-        const body = req.body;
+        const user = await schemas.Users.findOne({ uuid: req.params.uuid });
 
-        // Mise à jour de l'utilisateur
-        const result = await Users.updateOne(
-            { uuid: req.params.uuid },  // Filtrer par UUID
-            {
-                lastName: body.lastName,
-                firstName: body.firstName,
-                username: body.username,
-                email: body.email,
-                phone: body.phone,
-                roles: body['roles[]'] || []
-            }
-        );
-
-        if (result.nModified === 0) {
-            return res.status(404).json({ error: "Utilisateur non trouvé ou pas de modifications." });
+        if (!user) {
+            return res.status(404).send({ error: 'Utilisateur non trouvé.' });
         }
 
-        res.status(200).json({ success: "Utilisateur mis à jour avec succès." });
+        res.send({ success: true, user });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Erreur lors de la mise à jour de l'utilisateur." });
+        return res.status(500).send({ error: 'Erreur lors de la récupération de l\'utilisateur.' });
     }
 });
 
-// Route pour créer un nouvel utilisateur via API
-router.post("/new", async (req, res) => {
+// Route pour récupérer tous les utilisateurs
+router.get('/', async (req, res) => {
     try {
-        const body = req.body;
+        const users = await schemas.Users.find({});
+        res.send({ success: true, users });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send({ error: 'Erreur lors de la récupération des utilisateurs.' });
+    }
+});
 
-        // Création d'un nouvel utilisateur
-        const user = new Users({
-            lastName: body.lastName,
-            firstName: body.firstName,
-            username: body.username,
-            email: body.email,
-            phone: body.phone,
-            roles: body['roles[]'] || []
+// Route pour créer un nouvel utilisateur
+router.post('/', async (req, res) => {
+    try {
+        const { username, firstName, lastName, email, phone, password, roles, isActive } = req.body;
+
+        if (!username || !firstName || !lastName || !email || !password || !roles) {
+            return res.status(400).send({ error: 'Les champs nom d\'utilisateur, prénom, nom, email, mot de passe et rôles sont requis.' });
+        }
+
+        let hPassword = hashPassword(password);
+        const user = new schemas.Users({
+            username,
+            firstName,
+            lastName,
+            email,
+            phone,
+            password: hPassword,
+            roles,
+            isActive: isActive || true
         });
 
         await user.save();
-        res.status(201).json({ success: "Utilisateur créé avec succès", user });
+        res.status(201).send({ success: 'Utilisateur créé avec succès.', user });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Erreur lors de la création de l'utilisateur." });
+        res.status(500).send({ error: 'Erreur lors de la création de l\'utilisateur.' });
     }
 });
 
-// Route pour obtenir un utilisateur par UUID
-router.get('/:id', async (req, res) => {
+// Route pour mettre à jour un utilisateur
+router.put('/', async (req, res) => {
     try {
-        const user = await Users.findOne({ uuid: req.params.uuid });
+
+
+        const { uuid, username, firstName, lastName, email, phone, roles } = req.body;
+        const user = await schemas.Users.findOneAndUpdate(
+            { uuid: uuid },
+            { username, firstName, lastName, email, phone, roles },
+            { new: true }
+        );
 
         if (!user) {
-            return res.status(404).json({ error: "Utilisateur non trouvé." });
+            return res.status(404).send({ error: 'Utilisateur non trouvé.' });
         }
 
-        const allRoles = await Groups.find({});
-        res.status(200).json({ user, allRoles });
+        res.send({ success: 'Utilisateur mis à jour avec succès.', user });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Erreur lors de la récupération de l'utilisateur." });
+        res.status(500).send({ error: 'Erreur lors de la mise à jour de l\'utilisateur.' });
     }
 });
 
+// Route pour supprimer un utilisateur
+router.delete('/', async (req, res) => {
+    try {
+        const user = await schemas.Users.findOneAndUpdate(
+            { uuid: req.body.uuid },
+            { isActive: false },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).send({ error: 'Utilisateur non trouvé.' });
+        }
+
+        res.send({ success: 'Utilisateur désactivé avec succès.', user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ error: 'Erreur lors de la désactivation de l\'utilisateur.' });
+    }
+});
 
 module.exports = router;

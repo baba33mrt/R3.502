@@ -18,23 +18,17 @@
 
 
   "GET/api/users": {
-    "controller": "nosql/api/findReturnSpecific",
-    "modelName": "Users",
-    "return_type": "application/json",
-    "return_data": [
-      "uuid",
-      "username",
-      "fitstName",
-      "lastName",
-      "email",
-      "phone"
-    ]
+    "controller": "nosql/api/userController"
   },
-  "POST/api/users/:uuid/update": {
+  "PUT/api/users/update": {
     "controller": "nosql/api/userController",
     "return_type": "application/json"
   },
-  "POST/api/users/ne": {
+  "DELETE/api/users/delete": {
+    "controller": "nosql/api/userController",
+    "return_type": "application/json"
+  },
+  "POST/api/users/new": {
     "controller": "nosql/api/userController",
     "return_type": "application/json"
   },
@@ -45,15 +39,16 @@
 
 
 
+
   "GET/api/tickets/list": {
     "controller": "nosql/api/ticketsController",
     "return_type": "application/json",
     "title": "Liste des Tickets",
     "return_data": [
-      "_id",
       "state",
       "priority",
-      "subject"
+      "subject",
+      "uuid"
     ]},
   "POST/api/tickets/comment/add": {
     "controller": "nosql/api/ticketsComment",
@@ -72,7 +67,7 @@
     "return_type": "application/json"
   },
 
-  "POST/api/projects": {
+  "POST/api/projects/new": {
     "controller": "nosql/api/projectsController",
     "return_type": "application/json"
   },
@@ -89,7 +84,7 @@
     "return_type": "application/json"
   },
 
-  "POST/api/clients": {
+  "POST/api/clients/new": {
     "controller": "nosql/api/clientsController",
     "return_type": "application/json"
   },
@@ -101,12 +96,31 @@
     "controller": "nosql/api/clientsController",
     "return_type": "application/json"
   },
+  "GET/api/clients/:id": {
+    "controller": "nosql/api/clientsController",
+    "return_type": "application/json"
+  },
   "GET/api/clients": {
     "controller": "nosql/api/clientsController",
     "return_type": "application/json"
   },
 
-
+  "POST/api/groups/new": {
+    "controller": "nosql/api/groupsController",
+    "return_type": "application/json"
+  },
+  "PUT/api/groups/update": {
+    "controller": "nosql/api/groupsController",
+    "return_type": "application/json"
+  },
+  "DELETE/api/groups/delete": {
+    "controller": "nosql/api/groupsController",
+    "return_type": "application/json"
+  },
+  "GET/api/groups/:id": {
+    "controller": "nosql/api/groupsController",
+    "return_type": "application/json"
+  },
 
   "GET/dashboard/tickets": {
     "controller": "nosql/ticketsController",
@@ -221,18 +235,13 @@
   },
 
   "GET/admin/groups": {
-    "controller": "getView",
-    "view": "admin/home",
-    "title": "Dashboard Hotliner"
-  },
-  "GET/admin/groups/new": {
-    "controller": "getView",
-    "view": "admin/home",
+    "controller": "nosql/admin/groupsController",
+    "view": "admin/groups",
     "title": "Dashboard Hotliner"
   },
   "GET/admin/groups/edit": {
-    "controller": "getView",
-    "view": "admin/home",
+    "controller": "nosql/admin/groupsController",
+    "view": "admin/groupsEdit",
     "title": "Dashboard Hotliner"
   }
 }

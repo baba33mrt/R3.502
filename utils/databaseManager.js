@@ -6,7 +6,8 @@ const database = {
     Clients: loadSchema("Clients"),
     Projects: loadSchema("Projects"),
     Tickets: loadSchema('Tickets'),
-    Groups: loadSchema('Groups')
+    Groups: loadSchema('Groups'),
+    Permissions: loadSchema('Permissions')
 }
 
 

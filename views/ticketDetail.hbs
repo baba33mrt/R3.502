@@ -50,7 +50,6 @@
                 <h3 class="font-bold text-lg mb-3">Détails du ticket</h3>
                 <p><strong>Origine :</strong> {{ticket.origin}}</p>
                 <p><strong>Projet :</strong> {{ticket.project.name}}</p>
-                <p><strong>Description :</strong> {{ticket.content}}</p>
                 <p><strong>Statut :</strong> {{ticket.state}}</p>
                 <p><strong>Ticket affecté à :</strong> {{ticket.affected.lastName}} {{ticket.affected.firstName}}</p>
 
@@ -63,6 +62,7 @@
             <div class="comment-item p-3 bg-white border rounded-lg">
                 <p><strong>{{ticket.author.firstName}} {{ticket.author.lastName}}</strong></p>
                 <p class="text-gray-600">{{ticket.author.email}}</p>
+                <div class="ticket-container">{{{ticket.content}}}</div>
                 <span class="text-gray-500 text-sm">Publié le {{formatDateTime ticket.createAt}}</span>
             </div>
         </div>
@@ -203,7 +203,7 @@
                                 console.log("Utilisateurs récupérés :", users);
 
                                 // Créer les options de la liste déroulante
-                                const userOptions = users.map(user => `<option value="${user._id || user.id}">${user.username}</option>`).join('');
+                                const userOptions = users.users .map(user => `<option value="${user._id || user.id}">${user.username}</option>`).join('');
 
                                 Swal.fire({
                                     title: 'Affecter ce ticket',

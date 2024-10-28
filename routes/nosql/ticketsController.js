@@ -25,7 +25,7 @@ router.get('/:id', async (req, res) => {
         const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
 
         // Vérifier si l'utilisateur a déjà visualisé le ticket dans les 30 dernières minutes
-        const ticket = await Ticket.findById(req.params.id);
+        const ticket = await Ticket.findOne({uuid: req.params.id});
         if (!ticket) {
             return res.status(404).render('ticketDetail', { error: 1, origin: req.originalUrl });
         }

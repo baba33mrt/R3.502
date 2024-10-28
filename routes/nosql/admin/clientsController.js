@@ -5,14 +5,13 @@ router.use(express.urlencoded({ extended: true }));
 
 router.get('/:uuid', async (req, res) => {
     try {
-        // Correction ici : on passe req.params.id et non req.params
         const client = await schemas.Clients.findOne({uuid: req.params.uuid});
 
         if (!client) {
-            return res.render('404'); // Si l'utilisateur n'est pas trouvé
+            return res.render('404');
         }
 
-        const allProjects = await schemas.Projects.find({})
+        const allProjects = await schemas.Projects.find({isActive: true})
 
 
         res.render('admin/clientsEdit', { title: res.locals.title, client ,allProjects});
@@ -24,7 +23,7 @@ router.get('/:uuid', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const clients = await schemas.Clients.find({}); // Récupération de tous les utilisateurs
+        const clients = await schemas.Clients.find({isActive: true});
         res.render('admin/clients', { title: res.locals.title, clients, error: 0 });
     } catch (err) {
         console.error(err);

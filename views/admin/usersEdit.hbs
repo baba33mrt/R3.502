@@ -91,28 +91,28 @@
             </div>
 
             <!-- Bouton Activer/Désactiver Compte -->
+            <!--
             <div>
                 {{#if user.isActive}}
-                    <button type="button" onclick="toggleAccountStatus('{{user.uuid}}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Désactiver le compte</button>
+                    <button type="button" onclick="toggleAccountStatus()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Désactiver le compte</button>
                 {{else}}
-                    <button type="button" onclick="toggleAccountStatus('{{user.uuid}}')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Activer le compte</button>
+                    <button type="button" onclick="toggleAccountStatus()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Activer le compte</button>
                 {{/if}}
             </div>
-
+            -->
             <!-- Bouton Supprimer le Compte -->
             <div class="mt-6">
-                <button type="button" onclick="deleteAccount('{{user.uuid}}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Supprimer le compte</button>
+                <button type="button" onclick="deleteAccount()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Supprimer le compte</button>
             </div>
         </form>
     </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     const notyf = new Notyf({
-        position: {
-            x: 'right',
-            y: 'top'
-        },
+        position: { x: 'right', y: 'top' },
         duration: 3000
     });
 
@@ -121,8 +121,8 @@
         const formData = new FormData(document.getElementById('user-form'));
         const userData = Object.fromEntries(formData);
 
-        fetch(`/api/users/${userData.uuid}/update`, {
-            method: 'POST',
+        fetch(`/api/users/update`, {
+            method: 'PUT',
             headers: {
                 'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
                 'Content-Type': 'application/json'
@@ -139,32 +139,59 @@
         });
     }
 
-    // Fonction pour régénérer le mot de passe
+    // Fonction pour ouvrir un popup pour régénérer le mot de passe
     function regeneratePassword() {
-        fetch(`/api/users/regenerate-password`, {
-            method: 'POST',
-            headers: {
-                'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ uuid: document.getElementById('uuid').value })
-        }).then(response => {
-            if (response.ok) {
-                notyf.success("Le mot de passe a été régénéré avec succès.");
-            } else {
-                notyf.error("Erreur lors de la régénération du mot de passe.");
+        Swal.fire({
+            title: 'Régénérer le mot de passe',
+            html: `
+                <div>
+                    <label for="new-password" class="block text-left">Nouveau mot de passe :</label>
+                    <input type="password" id="new-password" class="w-full p-2 border rounded-lg" placeholder="Mot de passe">
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Confirmer',
+            cancelButtonText: 'Annuler',
+            preConfirm: () => {
+                const newPassword = document.getElementById('new-password').value;
+
+                if (!newPassword) {
+                    Swal.showValidationMessage('Veuillez entrer un mot de passe.');
+                }
+
+                return newPassword;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const newPassword = result.value;
+
+                fetch(`/api/users/regenerate-password`, {
+                    method: 'POST',
+                    headers: {
+                        'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ uuid: document.getElementById('uuid').value, password: newPassword })
+                }).then(response => {
+                    if (response.ok) {
+                        notyf.success("Le mot de passe a été régénéré avec succès.");
+                    } else {
+                        notyf.error("Erreur lors de la régénération du mot de passe.");
+                    }
+                });
             }
         });
     }
 
     // Fonction pour activer/désactiver le compte
-    function toggleAccountStatus(userId) {
-        fetch(`/api/users/${userId}/toggle-status`, {
+    function toggleAccountStatus() {
+        fetch(`/api/users/toggle-status`, {
             method: 'PUT',
             headers: {
                 'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ uuid: document.getElementById('uuid').value })
         }).then(response => {
             if (response.ok) {
                 notyf.success("Le statut du compte a été modifié.");
@@ -178,14 +205,15 @@
     }
 
     // Fonction pour supprimer le compte
-    function deleteAccount(userId) {
+    function deleteAccount() {
         if (confirm("Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.")) {
-            fetch(`/api/users/${userId}`, {
+            fetch(`/api/users/delete`, {
                 method: 'DELETE',
                 headers: {
                     'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({ uuid: document.getElementById('uuid').value })
             }).then(response => {
                 if (response.ok) {
                     notyf.success("Compte supprimé avec succès.");
@@ -198,6 +226,5 @@
             });
         }
     }
-
-    feather.replace(); // Initialisation des icônes feather
 </script>
+
