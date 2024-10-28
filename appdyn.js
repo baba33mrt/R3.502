@@ -75,6 +75,22 @@ hbs.registerHelper('includes', function(array, value) {
     return array && array.includes(value);
 });
 
+hbs.registerHelper('checkPermission', function (userPermissions, requiredPermissionBit, options) {
+    const hasPermission = (userPermissions & (1 << requiredPermissionBit)) !== 0;
+
+    if (hasPermission) {
+        return options.fn(this);
+    } else if (typeof options.inverse === 'function') {
+        return options.inverse(this);
+    }
+});
+
+// Helper Handlebars pour vérifier la permission d'un bit
+hbs.registerHelper('hasPermission', function (groupPermission, permissionBit) {
+    return (groupPermission & (1 << permissionBit)) !== 0;
+});
+
+
 if (global.config.mongodb.used) {
     global.db = {};
     const mongoClient = require('mongodb').MongoClient;
