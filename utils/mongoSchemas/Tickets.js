@@ -27,7 +27,7 @@ const ticketSchema = new mongoose.Schema({
     origin: { type: String, required: true },
     project: { type: mongoose.Schema.Types.ObjectId, ref: 'Projects', required: true },
     state: { type: Number, required: true, default: 1}, // 0: closed, 1: open, 2: in progress
-    priority: { type: Number, required: true }, // 0: low, 1: medium, 2: haut, 3: emergency
+    priority: { type: Number, required: true, default: 0 }, // 0: low, 1: medium, 2: haut, 3: emergency
     subject: { type: String, required: true },
     content: { type: String, required: true },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true },

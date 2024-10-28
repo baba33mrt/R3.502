@@ -1,0 +1,100 @@
+<!-- File d'Ariane -->
+<nav class="text-gray-500 mb-6" aria-label="Breadcrumb">
+    <ol class="list-reset flex">
+        <li><a href="/admin" class="text-blue-500 hover:underline">Tableau de bord</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li><a href="/admin/groups" class="text-blue-500 hover:underline">Liste des Grades</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li class="text-gray-600">{{group.name}}</li>
+    </ol>
+</nav>
+
+<section id="role-profile" class="mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold">Modifier les Permissions pour le Grade: {{group.name}}</h2>
+        </div>
+
+        <!-- Tuiles des permissions -->
+        <div id="permissions-grid" class="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {{#each permissions}}
+                <div class="bg-gray-100 p-4 rounded-lg shadow flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700">{{this.name}}</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input
+                                type="checkbox"
+                                id="{{this.name}}"
+                                data-permission="{{this.bit}}"
+                                class="toggle-checkbox sr-only"
+                                {{#if (hasPermission ../group.permission this.bit)}}checked{{/if}}>
+                        <span class="w-10 h-6 bg-gray-200 rounded-full shadow-inner transition-colors"></span>
+                        <span class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform {{#if (hasPermission ../group.permission this.bit)}}translate-x-4{{/if}}"></span>
+                    </label>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('permissions-grid').addEventListener('change', function (event) {
+        const target = event.target;
+        if (target.classList.contains('toggle-checkbox')) {
+            const permissionBit = target.getAttribute('data-permission');
+            const isEnabled = target.checked;
+            const previousState = !isEnabled;
+            const dot = target.nextElementSibling.nextElementSibling;
+
+            // Mettre à jour l'apparence de la dot en fonction de l'état de la case
+            dot.classList.toggle('translate-x-4', isEnabled);
+
+            fetch(`/api/groups/update`, {
+                method: 'PUT',
+                headers: {
+                    'CSRF-Token': "{{csrfToken}}",
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    uuid: "{{group.uuid}}",
+                    permissionBit,
+                    enable: isEnabled,
+                })
+            }).then(response => response.json()).then(data => {
+                if (!data.success) {
+                    target.checked = previousState;
+                    dot.classList.toggle('translate-x-4', previousState); // Revert appearance if error
+                    Swal.fire({
+                        title: 'Erreur',
+                        text: data.message || 'Une erreur est survenue.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }).catch(() => {
+                target.checked = previousState;
+                dot.classList.toggle('translate-x-4', previousState); // Revert appearance on network error
+                Swal.fire({
+                    title: 'Erreur',
+                    text: 'Une erreur réseau est survenue.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+    });
+</script>
+
+<style>
+    #permissions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    .toggle-checkbox:checked + span {
+        background-color: #66bb6a;
+    }
+    .dot {
+        transition: transform 0.3s ease;
+    }
+</style>

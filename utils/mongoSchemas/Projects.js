@@ -7,6 +7,7 @@ const Projects = new mongoose.Schema({
     name: {type: String, requires: true},
     description: {type: String},
     uuid: { type: String, default: uuidv4 },
+    isActive: { type: Boolean, default: true },
 
 })
 

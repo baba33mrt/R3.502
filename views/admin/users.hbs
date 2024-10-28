@@ -13,16 +13,12 @@
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold">Liste des Utilisateurs</h2>
             <!-- Bouton Ajouter un utilisateur -->
-            <a href="/admin/users/new" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                Ajouter un utilisateur
-            </a>
+            <button id="addUser" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Ajouter un utilisateur</button>
         </div>
-
 
         <table class="min-w-full bg-white">
             <thead>
             <tr>
-                <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600"></th>
                 <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Nom</th>
                 <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Prénom</th>
                 <th class="py-2 px-4 bg-gray-200 text-left text-sm font-semibold text-gray-600">Nom d'utilisateur</th>
@@ -34,13 +30,6 @@
             <tbody>
             {{#each users}}
                 <tr>
-                <td class="py-2 px-4 border-b">
-                    {{#if this.isActive}}
-                        <span class="py-2 px-4 border-binline-block bg-green-500 px-2 py-1 rounded-full mr-1"></span>
-                    {{else}}
-                        <span class="inline-block bg-red-500 px-2 py-1 rounded-full mr-1"></span>
-                    {{/if}}
-                    </td>
                     <td class="py-2 px-4 border-b">{{this.lastName}}</td>
                     <td class="py-2 px-4 border-b">{{this.firstName}}</td>
                     <td class="py-2 px-4 border-b">{{this.username}}</td>
@@ -64,6 +53,101 @@
     </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     feather.replace(); // Initialisation des icônes feather
+    const addUserButton = document.getElementById("addUser");
+
+    if (addUserButton) {
+        addUserButton.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Ajouter un utilisateur',
+                html: `
+                    <div>
+                        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                        <label for="username" class="block text-left">Nom d'utilisateur :</label>
+                        <input type="text" id="username" class="w-full p-2 border rounded-lg" placeholder="Nom d'utilisateur">
+
+                        <label for="lastName" class="block text-left mt-4">Nom :</label>
+                        <input type="text" id="lastName" class="w-full p-2 border rounded-lg" placeholder="Nom">
+
+                        <label for="firstName" class="block text-left mt-4">Prénom :</label>
+                        <input type="text" id="firstName" class="w-full p-2 border rounded-lg" placeholder="Prénom">
+
+                        <label for="email" class="block text-left mt-4">Email :</label>
+                        <input type="email" id="email" class="w-full p-2 border rounded-lg" placeholder="Email">
+
+                        <label for="phone" class="block text-left mt-4">Téléphone :</label>
+                        <input type="text" id="phone" class="w-full p-2 border rounded-lg" placeholder="Téléphone">
+
+                        <label for="password" class="block text-left mt-4">Mot de passe :</label>
+                        <input type="password" id="password" class="w-full p-2 border rounded-lg" placeholder="Mot de passe">
+
+                        <label for="roles" class="block text-left mt-4">Grades :</label>
+                        <select id="roles" multiple class="w-full p-2 border rounded-lg">
+                            {{#each allRoles}}
+                                <option value="{{this.name}}">{{this.name}}</option>
+                            {{/each}}
+                        </select>
+                        <p class="text-sm text-gray-500 mt-1">Maintenez la touche "Ctrl" (Windows) ou "Cmd" (Mac) pour sélectionner plusieurs grades.</p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Créer l\'utilisateur',
+                cancelButtonText: 'Annuler',
+                preConfirm: () => {
+                    const username = document.getElementById('username').value;
+                    const lastName = document.getElementById('lastName').value;
+                    const firstName = document.getElementById('firstName').value;
+                    const email = document.getElementById('email').value;
+                    const phone = document.getElementById('phone').value;
+                    const password = document.getElementById('password').value;
+                    const roles = Array.from(document.getElementById('roles').selectedOptions).map(option => option.value);
+
+                    if (!username || !lastName || !firstName || !email || !password || roles.length === 0) {
+                        Swal.showValidationMessage('Veuillez remplir tous les champs.');
+                    }
+
+                    return { username, lastName, firstName, email, phone, password, roles };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { username, lastName, firstName, email, phone, password, roles } = result.value;
+
+                    fetch('/api/users/new', {
+                        method: 'POST',
+                        headers: {
+                            'CSRF-Token': document.querySelector('input[name="_csrf"]').value,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, lastName, firstName, email, phone, password, roles })
+                    }).then(response => response.json()).then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Utilisateur créé',
+                                text: 'L\'utilisateur a été créé avec succès.',
+                                icon: 'success',
+                                confirmButtonText: 'Fermer'
+                            }).then(() => window.location.reload());
+                        } else {
+                            Swal.fire({
+                                title: 'Erreur',
+                                text: data.message || 'Une erreur est survenue lors de la création de l\'utilisateur.',
+                                icon: 'error',
+                                confirmButtonText: 'Fermer'
+                            });
+                        }
+                    }).catch(() => {
+                        Swal.fire({
+                            title: 'Erreur',
+                            text: 'Une erreur réseau est survenue.',
+                            icon: 'error',
+                            confirmButtonText: 'Fermer'
+                        });
+                    });
+                }
+            });
+        });
+    }
 </script>

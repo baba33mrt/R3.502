@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require("mongoose");
+const {tr} = require("@faker-js/faker");
 const router = express.Router();
 const Projects = schemas.Projects;
 
@@ -68,7 +69,11 @@ router.delete('/', async (req, res) => {
         }
 
         // Suppression du projet
-        const result = await Projects.deleteOne({ uuid: req.body.uuid });
+        const result = await schemas.Projects.findOneAndUpdate(
+            { uuid: req.body.uuid },
+            { isActive: false },
+            { new: true }
+        );
 
         if (result.deletedCount === 0) {
             return res.status(404).send({ message: 'Projet non trouvé.' });
@@ -80,6 +85,7 @@ router.delete('/', async (req, res) => {
     }
 });
 
+
 // Route pour lister tous les projets
 router.get('/', async (req, res) => {
     try {
@@ -88,7 +94,7 @@ router.get('/', async (req, res) => {
         }
 
         // Récupération des projets
-        const projects = await Projects.find({});
+        const projects = await Projects.find({isActive: true});
         res.setHeader('Content-Type', 'application/json');
         res.send(projects);
     } catch (err) {

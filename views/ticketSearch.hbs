@@ -145,7 +145,7 @@
                 if (data.tickets.length > 0) {
                     resultsBody.innerHTML = data.tickets.map(ticket => `
                         <tr>
-                            <td class="py-2 px-4 border-b"><a href="/dashboard/tickets/${ticket._id}">${ticket.uuid}</a></td>
+                            <td class="py-2 px-4 border-b"><a href="/dashboard/tickets/${ticket.uuid}">${ticket.uuid}</a></td>
                             <td class="py-2 px-4 border-b">${ticket.subject}</td>
                             <td class="py-2 px-4 border-b">${ticket.state}</td>
                             <td class="py-2 px-4 border-b">${ticket.project.name}</td>

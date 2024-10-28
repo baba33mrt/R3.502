@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
+const {v4: uuidv4} = require("uuid");
 
 const Groups = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
     color: { type: String, required: true },
-    // Utilisation de Number pour stocker les permissions sous forme de bits
+    uuid: { type: String, default: uuidv4 },
     permission: { type: Number, required: true }
 });
 

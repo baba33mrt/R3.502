@@ -13,6 +13,7 @@ const Clients = new mongoose.Schema({
         message: props => `${props.value} n'est pas une adresse email valide !`
     },
     projects: [{type: mongoose.Schema.Types.ObjectId, ref: "Projects"}],
+    isActive: { type: Boolean, default: true },
 
 })
 module.exports = mongoose.model('Clients', Clients, 'clients')
