@@ -235,12 +235,34 @@ passport.serializeUser(function(user, done) {
     done(null, user.uuid);
 });
 
-passport.deserializeUser(function(id, done) {
-    global.schemas["Users"].findOne({uuid: id}, function(err, user) {
-        //console.log(user)
-        done(err, user);
-    });
+passport.deserializeUser(async function(id, done) {
+    try {
+        // Peuplement du champ `roles` pour obtenir les informations des rôles avec permissions
+        const user = await global.schemas["Users"].findOne({ uuid: id }).populate({
+            path: 'roles'});
+
+        console.log(user.roles)
+
+        if (!user) {
+            return done(null, false);
+        }
+
+        // Calcul des permissions combinées
+        let combinedPermissions = 0;
+        if (user.roles && user.roles.length > 0) {
+            user.roles.forEach(role => {
+                combinedPermissions |= role.permission; // OR bitwise pour combiner les permissions
+            });
+        }
+
+        user.permissions = combinedPermissions; // Assigner le total des permissions calculées
+        done(null, user);
+    } catch (err) {
+        done(err);
+    }
 });
+
+
 
 passport.use(new LocalStrategy(
     // Version du code pour mongoDB via mongoose
